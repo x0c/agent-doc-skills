@@ -19,7 +19,7 @@ from typing import Any
 
 
 DOC_LINK_RE = re.compile(r"(?:\[[^\]]+\]\()?`?(\.?/?(?:docs|specs)/[^\s`)]+?\.md)`?\)?")
-GLOBAL_REF_RE = re.compile(r"(@?\s*(?:~|\$HOME|/Users/[^/\s`，。；；、)]+)/(?:\.claude|\.codex|\.config/opencode)/[^\s`，。；；、)]+)", re.I)
+GLOBAL_REF_RE = re.compile(r"(@?\s*(?:~|\$HOME|/Users/[^/\s`，。；；、)]+)/(?:\.claude|\.codex|\.config/opencode|\.agents|\.config/agentsync)/[^\s`，。；；、)]+)", re.I)
 NEGATIVE_EXAMPLE_RE = re.compile(r"(不要|不应|禁止|例如|示例|常见路径|路径形态|不是)")
 SELF_NAV_RE = re.compile(r"(何时该读|什么时候该读|前必读|前读|必读)")
 FORBIDDEN_INDEX_NAMES = {"TABLE_INDEX.md", "CODE_INDEX.md"}

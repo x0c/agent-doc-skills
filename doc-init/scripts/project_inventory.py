@@ -157,7 +157,17 @@ def has_path_parts(path: Path, parts: tuple[str, ...]) -> bool:
 
 
 def should_skip_path(path: Path) -> bool:
-    if path.name in IGNORE_DIRS:
+    name = path.name
+    if name in IGNORE_DIRS:
+        return True
+    # Xcode / SPM build caches (Corral and other Apple projects). Exact-name
+    # IGNORE_DIRS cannot match `.derivedData-*` variants; prefix-skip them.
+    if (
+        name.startswith(".derivedData")
+        or name.startswith("DerivedData")
+        or name.startswith(".build")
+        or name == "SourcePackages"
+    ):
         return True
     return any(has_path_parts(path, parts) for parts in IGNORE_PATH_PARTS)
 

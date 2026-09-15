@@ -21,13 +21,12 @@ Before running, discover the files that are actually in effect—do not hardcode
 **Target files are global AI instruction files only**—never pass a project `AGENTS.md`:
 
 ```bash
-# Discover the real global AI instruction file (follow symlinks to the real path)
-for f in ~/.claude/CLAUDE.md ~/.codex/AGENTS.md ~/.codex/instructions.md ~/.config/opencode/AGENTS.md; do
-  [ -f "$f" ] && readlink -f "$f" 2>/dev/null || echo "$f"
-done | sort -u
+python3 <DOC_INIT_DIR>/scripts/discover_global_instruction_files.py
 ```
 
-For each existing global file, run: `python3 <DOC_INIT_DIR>/scripts/insert_doc_governance.py <global-file-path>`.
+Exit `0` prints unique real paths (one per line). Exit `3` means none of the candidates exist — report that and ask the user for their global instruction file. Do not hand-roll a bash `readlink` loop (breaks on Windows).
+
+For each printed path, run: `python3 <DOC_INIT_DIR>/scripts/insert_doc_governance.py <global-file-path>`.
 The script prints `[skip]` = already current; `[added]` / `[upgrade]` = written—then scan the file’s remaining sections and remove stale local conventions.
 If `<DOC_INIT_DIR>` is missing: compare manually against `references/standard.md` item by item, and note “not auto-validated” in the report.
 

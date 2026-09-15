@@ -31,6 +31,7 @@ Prefer built-in scripts for mechanical work; keep model context for business jud
 | `scripts/git_history_miner.py` | Light Git-history weak-signal mining (hotspots, historical names, Q&A clues) |
 | `scripts/depth_scanner.py` | Deep knowledge extraction: state machines, concurrency, idempotency, events, entity fields, etc. |
 | `scripts/insert_doc_governance.py` | Version detect + auto insert/upgrade of the "Project Documentation Management" section in global AI instruction files |
+| `scripts/discover_global_instruction_files.py` | List unique real paths of user-level instruction files (follows symlinks); exit `3` if none exist |
 
 Script output is evidence and guardrails—it does not replace model judgment on business boundaries, canonical terms, KB/Guide granularity, or what to persist.
 
@@ -40,16 +41,20 @@ Script output is evidence and guardrails—it does not replace model judgment on
 
 ### Step 1 — Locate the real global AI instruction files
 
-Probe the following; if symlinks, follow to the real path (`readlink -f`), dedupe real paths, then process that list:
+Do not hand-roll a path probe. Run:
 
-1. `~/.claude/CLAUDE.md`
-2. `~/.codex/AGENTS.md`
-3. `~/.codex/instructions.md`
-4. `~/.config/opencode/AGENTS.md`
+```bash
+python3 <DOC_INIT_DIR>/scripts/discover_global_instruction_files.py
+```
 
-If none exist, report and ask the user for paths, then continue.
+The script follows symlinks, de-duplicates real paths, and prints one path per line. Candidates (only those that exist are printed): `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.codex/instructions.md`, `~/.config/opencode/AGENTS.md`, `~/.agents/AGENTS.md`, `~/.config/agentsync/AGENTS.md`.
 
-**Forbidden:** passing the current project's `AGENTS.md` to `insert_doc_governance.py`—only the global files listed above.
+| Exit code | Meaning | Next action |
+|-----------|---------|-------------|
+| `0` | One or more files found | Process that printed list |
+| `3` | None of the candidates exist | Report and ask the user for paths, then continue |
+
+**Forbidden:** passing the current project's `AGENTS.md` to `insert_doc_governance.py`—only paths printed by the discover script (or paths the user explicitly names as their global instruction file).
 
 ### Step 2 — Script validate and auto insert/upgrade
 
