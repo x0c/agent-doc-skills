@@ -1,7 +1,7 @@
 interface:
   display_name: "Doc Init"
-  short_description: "Initialize a project's documentation system"
-  default_prompt: "Use $doc-init to initialize the documentation system for this project."
+  short_description: "Establish or refresh documentation coverage"
+  default_prompt: "Use $doc-init to establish or refresh documentation coverage and its global lifecycle preset."
 
 policy:
   allow_implicit_invocation: true

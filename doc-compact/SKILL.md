@@ -1,11 +1,11 @@
 ---
 name: doc-compact
-description: Document cleanup and compression. Core job is compressing redundant docs without losing behavioral information—drop restatement, dead links, historical narrative, and duplicate reminders; also fix structure (placement, rebuild root AGENTS.md index, add inline pointers, normalize CLAUDE.md to a single `@*.md` line, decide and split secondary indexes for oversized projects) and check/install global doc-governance rules. Use when docs are bloated, indexes are broken, AGENTS.md is swollen, CLAUDE.md has junk, or you need to confirm global instructions spell out the doc management model.
+description: Audit and compress bloated project documentation while preserving behavior and repairing navigation. Use for redundant docs, broken indexes, oversized AGENTS.md, malformed CLAUDE.md, or missing global documentation governance.
 ---
 
 # doc-compact
 
-**Document language:** Follow existing project docs / user language when writing; default English if unclear. Do not set language policy that conflicts with global AGENTS. This skill must NOT inject language/memory/review rules into `insert_doc_governance` managed blocks.
+Apply the installed `Project Documentation Management` lifecycle contract. Environment instructions own language, permissions, model selection and shared-document locations.
 
 Before running, discover the files that are actually in effect—do not hardcode paths.
 `<DOC_INIT_DIR>` defaults to a sibling of this skill: `<directory of this SKILL.md>/../doc-init`
@@ -16,7 +16,9 @@ Before running, discover the files that are actually in effect—do not hardcode
 
 ---
 
-## Step 1 — Global rules
+## Step 1 — Global rules (may write)
+
+For an explicitly read-only audit, inspect the installed contract and run Step 2 only. Report proposed changes; do not run the injector, stamp files, or execute repair/compression steps.
 
 **Target files are global AI instruction files only**—never pass a project `AGENTS.md`:
 
@@ -27,8 +29,8 @@ python3 <DOC_INIT_DIR>/scripts/discover_global_instruction_files.py
 Exit `0` prints unique real paths (one per line). Exit `3` means none of the candidates exist — report that and ask the user for their global instruction file. Do not hand-roll a bash `readlink` loop (breaks on Windows).
 
 For each printed path, run: `python3 <DOC_INIT_DIR>/scripts/insert_doc_governance.py <global-file-path>`.
-The script prints `[skip]` = already current; `[added]` / `[upgrade]` = written—then scan the file’s remaining sections and remove stale local conventions.
-If `<DOC_INIT_DIR>` is missing: compare manually against `references/standard.md` item by item, and note “not auto-validated” in the report.
+The script prints `[skip]` = already current; `[added]` / `[upgrade]` = written—then migrate only explicitly reviewed duplicate clauses. Preserve unrelated non-managed text; no theme-based deletion.
+If `<DOC_INIT_DIR>` is missing, use the installed lifecycle contract for project work and report that preset installation could not be verified. Do not inject `references/standard.md`; it is an operational checklist, not the preset.
 
 **Do not** pass the current project’s `AGENTS.md` to `insert_doc_governance.py`—project `AGENTS.md` holds project rules, not global AI instructions; writing into it pollutes project docs.
 
@@ -64,27 +66,18 @@ When H shows `domain_map_present=True`, keep the root AGENTS.md sections `## 领
 
 Default is a single flat layer. **Prefer not to add levels**—each extra hop multiplies miss-read risk.
 
-Two independent triggers (either one justifies folding):
+Fold only when a group makes navigation hard to scan. A large navigation share, >500 root lines, or ≥3 related incident/review records are audit signals, not automatic triggers. Keep direct links when they remain clear.
 
-**① Size-driven:** navigation occupies ≳ 1/2 of AGENTS.md, or rules are pushed into the second half of the file (primary criterion); fallback: > 500 lines with substantial navigation.
-How to split: root keeps only “task-domain index entry” lines (one per domain); details move to named `<DOMAIN>_INDEX.md`.
-
-**② Type-driven:**
-- Troubleshooting records ≥3 → fold into `docs/troubleshooting/TROUBLESHOOTING_INDEX.md`
-- Review ledgers ≥3 → fold into `docs/reviews/REVIEW_INDEX.md`
-- Strong routes must include “when to skip / whether this is the authority”—not just bare filenames
-
-**Incident docs outside `troubleshooting/` still count toward the ledger (AlphaForge 2026-09-05):** many repos put incidents under `docs/operations/` (filename matching `incident` / `fix`, or `YYYY-MM-DD-*.md`). `audit.py` check G sums operations incident candidates with troubleshooting against the threshold—**humans still fold by type**. Prefer a **pointer-style** `TROUBLESHOOTING_INDEX.md` (symptom → authoritative original path); **do not relocate files by default** (relocation = high-risk whole-repo reference sync). Leave originals in `operations/`; the index must state “authority is the original; when the index may be skipped.”
+When folding, root links a named `<DOMAIN>_INDEX.md`, which links original docs with independently actionable routes. State whether the index is merely a pointer and when it may be skipped. No third hop. Incidents in `operations/` also count as candidates; prefer a pointer index over moving files and changing every reference.
 
 ## Step 4 — Fix structure
 
 - **CLAUDE.md:** not a single line → restore `@AGENTS.md`; only an injection block with no content → delete the dangling CLAUDE.md too
-- **Doc naming/placement:** align with rules (knowledge bases/guides `SCREAMING_SNAKE_CASE`, design/review `kebab-case`, troubleshooting `YYYY-MM-DD-*`); list moves/renames for confirmation first, then sync whole-repo references
+- **Doc naming/placement:** align with rules (knowledge bases/guides `SCREAMING_SNAKE_CASE`, design/review `kebab-case`, troubleshooting `YYYY-MM-DD-*`); review moves/renames against task authorization, then sync whole-repo references
 - **Navigation blurbs:** check each line is “when to read” vs “what it is about”—the latter routes poorly; rewrite to the former; triggers must cover all task types (change / create / review / troubleshoot / optimize)
 - **Index rebuild:** list only real docs, cluster by domain, high-frequency first; drop dead links/empty placeholders; skip protected sections; preserve 🔒 managed blocks from J verbatim
-- **Injection blocks / bare indexes:** ① read the block and identify rules; ② check coverage against AGENTS.md item by item; ③ merge uncovered items after distillation; ④ delete the whole injection block
-- **`managed:inherited-agents` (Codes + local `sync-agent-files`):** **do not** delete as “leftover tool injection”—`pre-commit` will reinject the whole block on the next commit. Fix dead links by changing the **product-root** navigation to absolute paths (see global `docs/WORKSPACE_ORGANIZATION_GUIDE.md`), not by clearing the block. If audit C lists this block, treat it as expected (C already exempts the marker; J lists it as a 🔒 managed block).
-- **`managed:inherited-agents` (repos without reinjection hooks):** delete the injection only when child-repo-specific rules already supersede parent rulings; before delete, confirm hard rulings remain reachable from the child’s required-read entry points. Do not leave parent paths (`backend/docs/...`) verbatim in child body text as dead links.
+- **Unmanaged legacy injection / bare indexes:** identify rules, check existing coverage, then merge uncovered valid content and remove only authorized redundant material. This does not apply to the generated `Project Documentation Management` section or any managed block: preserve those and fix their source instead.
+- **Inherited instructions:** identify their generating source and any reinjection hook. Fix broken routes in the source; do not erase a managed block or edit only its generated copy. Without a generating mechanism, remove a redundant block only after its still-valid rules remain reachable and the removal is authorized.
 
 ## Step 5 — Compress (core deliverable, non-skippable)
 
@@ -94,11 +87,11 @@ Full compression criteria and playbook: [`references/compression-guide.md`](refe
 
 - Every document under `docs/` and `specs/` must be run through the criteria one by one; silent skips are forbidden; the close-out report must give a per-doc ledger (was N lines → now M lines, or “reviewed, nothing compressible, reason: xxx”)
 - By default the main agent does not compress doc bodies directly—per-doc compression is dispatched to subagents in parallel; main-agent context holds only “shard plan + criteria checklist + returned ledgers”. Fallback when sharding fails: see “Subagent model and quota-failure fallback” below
-- Subagents must be injected with three things: ① full compression-guide.md (criteria baseline); ② this project’s protected-section list (root AGENTS.md `## 领域地图（doc-init）` and `## 待补充知识库（doc-init backlog）` sections; KB `§0 目录索引` TOC / `§1.5 架构概览` mermaid / `§2.5 物理路径速查` path table; method-name anchors; 🔒 managed blocks from J—do not delete or compress); ③ high-risk list (the five “list first, confirm” items below—subagents must not execute them unilaterally; return to main agent for ruling). Without these three, criteria drift across parallel subagents is worse than serial single-agent runs
+- Subagents must be injected with three things: ① full compression-guide.md (criteria baseline); ② this project’s protected-section list (root AGENTS.md `## 领域地图（doc-init）` and `## 待补充知识库（doc-init backlog）` sections; KB `§0 目录索引` TOC / `§1.5 架构概览` mermaid / `§2.5 物理路径速查` path table; method-name anchors; 🔒 managed blocks from J—do not delete or compress); ③ high-risk list (the review-required items below—subagents must not execute them unilaterally; return to main agent for scope and evidence review). Without these three, criteria drift across parallel subagents is worse than serial single-agent runs
 - Subagents only touch docs assigned to them under `docs/` (and this repo’s `specs/`); they must not touch root AGENTS.md / navigation / indexes—index rebuild and whole-repo reference sync are a global view, done serially by the main agent in Step 4
 - After ledgers return, the main agent runs the guide’s “Drift protection for parallel subagent compression” chapter for cross-shard consistency (criteria divergence, cross-shard volatile facts, protected-section mishaps); unify high-risk rulings, then send back for landing
 
-**Shard plan** (deterministic arithmetic, scripted; default budget 90k tokens/shard = measured net budget for a 128K window; other windows scale with `--budget`):
+**Shard plan:** use the script to pack source plus expected output within the active model budget; override `--budget` for the current window.
 
 ```bash
 # Must exclude .worktrees / build caches; do not count worktree copies as product docs (script already prunes)
@@ -110,24 +103,14 @@ python3 scripts/plan_shards.py <project-root> --domain-map <map.json> # final pa
 - Large KBs (single doc > 20k tokens) are auto-detected by the script and each get their own subagent
 - On a new project’s first run, sample 3–5 docs to calibrate chars→token coefficient (script defaults adaptively pick 0.40/0.47/0.55 by content mix; override with `--coef` when far off)
 
-**Coefficient source (measured, not guessed):** sample of 14 docs from the mc-mdcrm repo, `tiktoken cl100k_base` weighted average = **0.47** (narrative-dense 0.55–0.60; code/table-dense 0.29–0.45). Details in the `plan_shards.py` header comment.
-
-**Budget accounting (measured on a 128K window):**
-
-| Item | 128K-window subagent |
-|------|----------------------|
-| Total window | 128k |
-| Minus: compression-guide.md injection | ~5k |
-| Minus: protected sections + high-risk list + domain context | ~7k |
-| Minus: thinking + per-doc ledger output reserve | ~18k |
-| **Net budget per shard (original docs + compressed output)** | **≈ 90k tokens** |
+Token coefficients and budget assumptions live in `plan_shards.py`; calibrate against representative docs and the actual model window rather than assuming a universal capacity.
 
 **Execution tiers:**
 - **Low risk, do directly:** restatement / dead links / historical narrative / empty placeholders / duplicate reminders / line-number refs (“line N” / “Line N” / “第 N 行” → Read first to confirm the method name, then replace with `ClassName.method()` anchors) / form conversion (narrative → call chains / tables / decision tables; information unchanged, form only) (list in the report)
-- **High risk, list first then confirm:** delete whole docs, rewrite large sections, split/merge index structure, edit body text that contains numbers/boundary conditions, delete §0/§1.5/§2.5 sections
+- **Review scope and evidence before editing; follow active permission rules:** delete whole docs, rewrite large sections, split/merge index structure, edit body text that contains numbers/boundary conditions, delete §0/§1.5/§2.5 sections
 - **On anomaly, fix now (no deferral):** doc anomalies found during compression—skipped/duplicated chapter numbers, duplicate subsection titles, broken tables, dangling § refs, disordered subsections, table/class/path names that look wrong vs code, unrepaired cross-doc duplication—must be fixed this round; do not defer with “hand to doc-update” or “handle next time.” Tiers: single-file fixes that do not renumber other sections (duplicate titles, broken tables, in-doc dangling refs) → subagent fixes directly; fixes that affect external refs (renumbering, subsection reorder, renames) → return to main agent, who greps whole-repo refs and fixes+syncs on the spot; factual doubts → verify against source (entity classes / @TableName / directory layout) then fix. Criteria and disposition table: guide chapter “Fix anomalies on discovery.”
 
-**Subagent model and quota-failure fallback (2026-09-05):** when dispatching Task, **default `model` inherits the parent session**; do not hardcode quota-hungry slugs for speed (specifying `composer-2.5` once caused a whole batch of `Increase limits` failures). If every parallel Task fails to start: ① immediately retry a small smoke shard on the default model; ② if still failing, main agent **degrades to serial**, prioritizing incidents/troubleshooting → research/evals → already-dense KBs/specs marked “reviewed, nothing compressible”; ③ close-out report must say “sharding failed; degraded,” and must not pretend parallel completed.
+**Delegation fallback:** follow the active environment's model and concurrency policy. If workers cannot start, retry one small shard with an allowed model; if it still fails, continue serially, prioritizing incidents and troubleshooting. Report degraded execution and unfinished scope; do not claim parallel completion.
 
 **Second-pass compression is normal:** for architecture KBs / specs / playbooks last compressed >30 days ago, many “reviewed, nothing compressible” results are a **valid conclusion**, not laziness. Do not delete field tables, curls, or thresholds just to inflate a compression ratio. Incident docs still use the troubleshooting intensity scale—not the same scale as KBs.
 
@@ -151,23 +134,11 @@ If the §2.5 liveness follow-up from Step 2 found STALE paths and they were clea
 
 **§0 TOC completeness:** docs using the KB template (`*_KNOWLEDGE_BASE.md`) should have a `§0 目录索引` / TOC section. Missing ones are **filled this round** (mechanically from headings—low risk, do directly); list them in the close-out report; do not defer.
 
-## Step 6.5 — Promote cross-project lessons to global (non-skippable)
+## Step 6.5 — Promote cross-project knowledge
 
-After compression and audit pass, **scan this product’s `docs/` (and cross-cutting sections in root AGENTS)** for lessons that still hold in other product repos:
+Apply the preset's destination rules while reviewing product docs: shared platform facts and constraints go to declared shared guides; reusable task procedures go to matching skills. Compare existing authorities, update missing knowledge, and retain local product details plus pointers. Do not hardcode another user's paths or install unrelated global policies.
 
-| Type | Typical landing (agentsync source of truth) |
-|------|-----------------------------------------------|
-| macOS menu bar / silent launch at login / hidden icon | `docs/MACOS_APP_DEVELOPMENT_GUIDE.md` |
-| System permissions / Automation / Apple Events | `_standards/.../macos-system-permissions.md` or a registered global-index specialty |
-| Distribution / notarization / Sparkle / Developer ID | `docs/APP_STORE_CHINA_LISTING_GUIDE.md` or an existing distribution guide |
-| Local proxy / Claude entry point | `docs/MAC_PROXY_AGENT_GUIDE.md` |
-| Workspace / inherited injection / no `.git` | `docs/WORKSPACE_ORGANIZATION_GUIDE.md` |
-| Leak gate | `docs/LEAK_GATE_GUIDE.md` |
-| Other cross-product mechanisms | Create or extend matching `docs/*_GUIDE.md`, and add trigger words to the global `AGENTS.md` rule index |
-
-**Actions:** compare against global authority—if global is missing, write/extend; in the product repo, turn generic sections into “authority: global …; product-specific: …” pointers. Do not merely shorten reusable passages and leave them product-only. If they contradict global, do not rule unilaterally—list under close-out “pending user confirmation.”
-
-**This step is not optional:** user ruling 2026-09-05 requires doc governance to promote actively. Close-out reports must have a separate “promote to global” ledger (which docs written / skipped because already present / pending confirmation).
+Report promoted items, existing coverage, unresolved factual conflicts and missing destination bindings. A missing shared destination is a reported limitation, not permission to invent one.
 
 ## Safety boundaries
 

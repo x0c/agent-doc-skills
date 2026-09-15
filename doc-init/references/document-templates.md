@@ -124,20 +124,11 @@ Replace `<placeholder>` with this domain’s real entries. Low-confidence valida
 
 Do not fabricate historical incidents or real pitfalls. If the user volunteers past issues in Q&A, you may write “common easy-to-miss conditions” or “pending doc-update persistence”; without evidence, mark low confidence or to be filled.
 
-Immediately after generating a doc, add a nav entry in root `AGENTS.md`. The nav section should declare the trigger pattern once in the header or group title (e.g. “Read the following docs first when developing, reviewing, or troubleshooting the matching domain”), and each item only lists that doc’s **business-scope keywords**—do not repeat “must read before…”. Agents route by keywords without drowning in repeated formulas.
+Immediately after generating a doc, add its complete navigation route to root `AGENTS.md` (or the appropriate registered secondary index). Important normative docs require an independently actionable **must read + task/domain trigger + consequence**. Keep equivalent strength in nearby pointers. Ordinary references use descriptive task routes without claiming mandatory status.
 
-Good (header declares the shared trigger; each item only has distinguishing info):
-```md
-> Read the following docs first when developing, reviewing, or troubleshooting the matching domain.
+Example: `docs/PAYMENTS_KNOWLEDGE_BASE.md`: **must read** before changing, reviewing or troubleshooting callbacks/refunds; otherwise duplicate callbacks can credit a payment twice.
 
-- `docs/CUSTOMER_KB.md`: customer profile changes, status transitions, batch tags, customer query semantics
-- `docs/TIER_KB.md`: tier system, upgrade/downgrade rules, retention expiry, tier validity calculation
-- `docs/VERSION_MANAGEMENT.md`: sub-config CRUD, DRAFT/RELEASE lifecycle, "opens as draft" issue
-```
-
-Bad: “explains customer-module business logic” (content dump, no trigger signals); every item writes “must read before changing, reviewing, or troubleshooting X” (shared factor not extracted—pure noise).
-
-Prefer `scripts/upsert_agents_nav.py` for nav writes to avoid duplicates and format drift:
+Avoid content-only blurbs and keyword-only entries that depend on a shared preamble.
 
 ```bash
 python3 <DOC_INIT_DIR>/scripts/upsert_agents_nav.py --root . --path docs/<DOMAIN>_KNOWLEDGE_BASE.md --when-to-read "<when to read>"
@@ -221,7 +212,7 @@ Nav rules:
 
 - Domain KBs first: cluster by business module / domain / line; high-frequency domains earlier.
 - Shared Guides next: flow orchestration, sharding routing, permissions, plugin components, ops validation, and other horizontal mechanisms after domain KBs.
-- Each item only business-scope keywords (e.g. “payment callbacks, refunds, reconciliation”); declare the shared trigger pattern once in the section header.
+- Each entry includes its task/domain trigger; important normative docs also carry their own must-read strength and consequence.
 - Do not flatten by tech resource: do not make tables/classes/APIs the main root-nav structure; those indexes live in the corresponding domain KB.
 
 After generate/update, run:

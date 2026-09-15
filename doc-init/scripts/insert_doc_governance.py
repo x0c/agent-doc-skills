@@ -10,7 +10,7 @@ Idempotent behavior:
 - If the file has an older version (or an unversioned old section) → replace with the new version.
 - If there is no Project Documentation Management section → insert.
 
-Insert position (priority order):
+New-install position (upgrades replace the existing section in place):
 1) Before "## 附：外部托管区块" (agentsync canonical Chinese marker)
 2) Before agentsync:begin / external-managed markers
 3) Before the first @ reference line (@RTK.md, etc.)
@@ -23,7 +23,7 @@ the next doc-init run will detect and upgrade already-deployed older versions.
 import sys
 import re
 
-CURRENT_VERSION = 16
+CURRENT_VERSION = 17
 
 # Heading used in the injectable STANDARD (English for open-source inject).
 SECTION_TITLE = "Project Documentation Management"
@@ -33,142 +33,104 @@ LEGACY_SECTION_TITLE = "项目文档管理"
 STANDARD = f"""## {SECTION_TITLE}
 <!-- doc-governance-version: {CURRENT_VERSION} -->
 
-### 1. Core rules
+### 1. Ownership and entry points
 
-* Root `AGENTS.md` is the project's only top-level documentation entry; long-lived docs must be reachable in one or two hops from root `AGENTS.md`.
-* Project-root `CLAUDE.md` must default to a single line: `@AGENTS.md`
-* When creating or first taking over a project, check whether the global AI instruction file declares where cross-project tech standard docs live; if declared, look up matching docs by the project's primary language/stack and add a reference at the top of project-root `AGENTS.md` (if undeclared, skip—do not invent paths).
-* **This managed block owns only documentation structure and governance** (entry points, navigation, indexes, single source of truth, what belongs in docs, end-of-task doc checks). **It does not own:** comment/log language, disabling memory, reading standards before review, how to speak to the user, search-before-acting, or any other Agent behavior—those live only in the **non-managed** sections of the global instructions; do not re-introduce them into this block, or into doc-* skills, as a global source of truth. Boundary details: global `docs/SKILLS_GUIDE.md`.
+* This block owns the documentation lifecycle: capture, selection, organization, correction, cross-project promotion and verification. Its maintenance source is doc-init's injectable preset; the installed block is a generated copy. Skill bodies supply execution procedures, not competing policies.
+* Language, memory facilities, permissions, Git/release behavior, model selection and actual shared-document locations belong to the user's environment instructions. Documentation improvement does not authorize unrelated implementation or rewriting other global policies.
+* Root `AGENTS.md` is the project's only top-level documentation entry. Long-lived docs must be reachable in one or two hops. Project-root `CLAUDE.md` defaults to the single line `@AGENTS.md`.
+* On project creation or takeover, discover any declared cross-project standards location and link matching language/stack standards near the top of root `AGENTS.md`. Do not invent a location if none is declared.
 
-### 2. Documentation navigation
+### 2. Capture and continuous improvement
 
-Project-root `AGENTS.md` must contain a documentation-navigation section that registers every long-lived doc in the project.
+* Before implementing durable product decisions, requirements or corrections, record the current requirement in the appropriate document and make its entry reachable. Exclude temporary task scope, illustrative examples and unadopted suggestions. For a wording veto, capture the usefulness test, not a permanent ban on the rejected words.
+* Persist reusable investigation findings when established, including Q&A with no code changes. Use `doc-update` when available for incremental updates; at closure, check for omissions. No new durable knowledge means no forced update.
+* Record relevant symptoms, applicability, causes, remedies and verification evidence. Distinguish verified facts, unverified hypotheses and decisions awaiting confirmation. Existing mechanism coverage does not imply that a newly observed symptom or failed remedy is already documented.
+* Search existing authoritative docs before adding material. If a needed doc was missing, hard to find or misleading, repair its coverage, routing or wording in the same bounded update. Preserve valid task coverage while merging repetition and removing obsolete triggers.
+* When correct documentation still leaves a recurring operational obstacle, record an actionable environment-improvement item alongside the workaround. Tracking the improvement does not authorize implementing it outside the task.
 
-Navigation rules:
+### 3. Placement and knowledge selection
 
-* One navigation line per doc, with path and purpose.
-* Write the purpose as "when to read", covering every task type for that domain (change / create / review / troubleshoot)—not merely "what it is".
-* Gate triggers on task type and business domain (e.g. "before changing or reviewing module X"), never on whether the code already uses a given technology (e.g. "when Liquid Glass is involved"). The latter breaks review tasks: the code under review may not use that technology yet, so the model treats the condition as unmet, skips the doc, and misses exactly the "should have used it but did not" finding.
-* **Importance strength must match the doc's real value:** a genuinely must-read doc (costly, hard constraints, recorded pitfalls) must be registered as "**must read** + what breaks if you skip it", in nav and in nearby pointers—not as a weak hint such as "read before involving X", "read first", or "worth a look". Agents triaging normative docs rank by that wording, and weak sentences get dropped. Being reachable from an index does not mean it will be read. (2026-08, Harbor client coordinate offset: the GCJ-02 doc existed, but was registered only as "read before involving location/maps"; the Agent skipped it and hit the same pitfall again.)
-* **When the same doc is referenced from several places, the strengths must not contradict each other:** if root `AGENTS.md` says "must read", a subproject entry or nearby pointer must not soften it to "read before" or "read first"—when strengths conflict, Agents follow the weakest one (2026-08 full-repo audit: the LingoWeave product knowledge base was "must read" at root but only "read before" on the client side; the same SharedPlatform doc carried inconsistent strengths).
-* **Forbidden: wrapping a doc list in one weak lead-in**, e.g. "read the following docs first when the matching domain is involved" followed by a list of knowledge bases. The lead-in is the weakest possible hint, and the entire list gets skipped with it. Every must-read doc must carry its own "**must read** + consequence"; do not weaken a whole group through a shared lead-in sentence (2026-08 audit: the JotBox and Curio backend knowledge-base lists weakened Outbox idempotency and state-machine hard constraints this way).
-* **These strength rules are not limited to project-root `AGENTS.md` nav:** cross-product standards (`_standards/*.md`), `workspace-docs/*/README.md` secondary indexes, and global-instruction-file navigation follow them too—across projects, those files are the entry Agents actually land on, so their index entries also need "when to read + must read + consequence" (2026-08 audit: the swift, go, and frontend standards still used weak wording like "see" and "pitfalls in"; `java.md` and 12 java-docs runbooks had no index entry at all despite carrying hard constraints).
-* **Register new docs immediately, then reverse-check; no todo placeholders:** after writing a doc under `docs/`, sync it into nav; after registering, scan `docs/` in reverse for anything missed; never leave placeholders like "should we add this?" or "register once implemented" (2026-08 audit: AlphaForge strategy and backtest architecture docs existed unregistered, with only a "should we add this?" note in `AGENTS.md`; the Infrastructure observability README carried hard pitfalls with zero registration).
-* Prefer placing doc pointers next to the rule they support, not only in a bottom navigation table.
-
-Examples:
-
-```md
-- `docs/BILLING_KNOWLEDGE_BASE.md`: must read before changing, reviewing, or troubleshooting subscription, payment, quota deduction, or bill status flows.
-- `docs/AUTH_PERMISSION_GUIDE.md`: must read before developing, reviewing, or changing user login / permission control.
-```
-
-```text
-<project-root>/
-├── AGENTS.md
-├── CLAUDE.md
-└── docs/
-    ├── *_KNOWLEDGE_BASE.md (domain knowledge bases)
-    ├── *_GUIDE.md (domain guides)
-    ├── ...
-    ├── design/
-    ├── troubleshooting/
-    └── ...
-```
-
-### 3. Secondary indexes
-
-Do not create secondary indexes by default; prefer root `AGENTS.md` navigating directly to concrete docs.
-
-Create a secondary index only when one class of docs has grown large enough that listing it flat hurts root `AGENTS.md` readability, e.g.:
-
-```text
-- `docs/troubleshooting/TROUBLESHOOTING_INDEX.md`: must read before troubleshooting any fault / error / abnormal behavior—check for prior similar cases first
-- `docs/reviews/REVIEW_INDEX.md`: must read before reviewing or largely changing a module: read historical review conclusions and residual risks first
-```
-
-After creating a secondary index, root `AGENTS.md` keeps only the index entry; details sink into the secondary index. No tertiary-or-deeper index chains.
-
-### 4. Documentation changes
-
-* New docs: register in root `AGENTS.md` at the same time.
-* Deleted docs: remove the nav entry from root `AGENTS.md` at the same time.
-* Migrated or renamed docs: search the whole repo for references and update them.
-* New long-lived doc types: explain purpose, location, and entry path in root `AGENTS.md` at the same time.
-
-### 5. Single source of truth
-
-* One concept, rule, or mechanism has one authoritative source.
-* Other docs that need it use relative-path links—do not copy-paste.
-* Once an authoritative conclusion or canonical term is confirmed and updated, every doc citing the old conclusion / old name must be corrected in sync; two docs must never contradict each other on the same fact at any moment. If you cannot decide which is right on the spot, return to authoritative sources (product / requirements / code); if still undecided, mark it "pending confirmation"—do not leave contradictions in place.
-
-### 6. What to record
-
-Should record:
-
-* Project-level behavior norms, constraints, mandatory processes.
-* Project business rules, architecture mechanisms, domain knowledge.
-* Design, process, and config explanations that change because code changed.
-* Reusable failure causes, troubleshooting paths, and fixes.
-* Long-lived conclusions, risk points, and follow-up constraints from reviews.
-
-Should not record:
-
-* Information already clearly expressed by the code itself.
-* History available via `git log` / `git blame`.
-* One-off phenomena.
-* Information useful only for the current session and not reusable later.
-* Rules already recorded elsewhere.
-
-When to persist user product intent or investigation conclusions, whether to call `doc-update`, and when to promote cross-project findings to global docs—follow the **non-managed** sections of the global instructions, such as "Conclusions and product-intent persistence"; this block does not re-legislate them.
-
-### 7. End-of-task documentation check
-
-Before ending a task, check:
-
-* Promised docs are finished.
-* New docs are registered in root `AGENTS.md`.
-* After delete / migrate / rename, old references are cleaned.
-* List added / modified / deleted docs by path for the user, one line of explanation each; if nothing changed, say so explicitly: "No documentation changes this time".
-
-| Information type | Target location |
+| Information | Authoritative destination |
 |---|---|
-| Cross-project reusable patterns / checklists / scripts | Corresponding skill files |
-| Project-level behavior norms / constraints / mandatory processes | Project-root `AGENTS.md` |
-| Project business rules / architecture / domain knowledge / docs invalidated by code changes | Docs under `docs/` |
+| Project-wide operating rules | Project-root `AGENTS.md` |
+| Product behavior, domain knowledge, architecture | Matching document under project `docs/` |
+| Reusable task procedure, checklist or executable helper | Matching skill |
+| Cross-project platform facts, constraints and troubleshooting knowledge | Declared shared guide or standards location |
+| Recurring environment obstacle requiring implementation | Existing project backlog or an indexed design/troubleshooting document |
 
-Where global docs land, and end-of-task discipline such as "always call doc-update", stay in the non-managed global sections "Conclusions and product-intent persistence" and "Pre-finish reflection"; do not repeat them here.
+* During updates and full document cleanup, promote reusable cross-project knowledge to the declared shared authority; keep product-specific details and pointers locally. If no destination is declared, report the missing binding instead of inventing a machine path.
+* Keep knowledge that prevents rediscovery or mistakes: business rules, hidden constraints, validated workflows, failure causes, remedies and unresolved material risks. Do not duplicate code structure, Git history, existing rules or session-only narrative.
+* Use domain knowledge bases, guides, design docs or troubleshooting records according to the project's registered types. Register a new long-lived type's purpose and placement at the root; do not create competing bare `INDEX.md` / `OVERVIEW.md` entry points.
+
+### 4. Navigation and indexes
+
+* Each long-lived doc has one navigation entry at the root or its registered secondary index. Write when to read it, covering applicable task types and domain triggers, not merely its contents or a technology already present in code.
+* Important normative docs need an independently actionable **must read + trigger + consequence** entry. Preserve equivalent strength in secondary indexes and nearby pointers; a shared preamble cannot replace individual mandatory routes. Ordinary references need not claim mandatory status.
+* Put a pointer beside a rule it supports. This may coexist with the doc's single navigation entry.
+* Default to direct root links. Add a named `<DOMAIN>_INDEX.md` only when a group makes navigation hard to scan; counts and line limits are audit signals, not automatic restructuring commands. Root then links the index and the index links the documents. No deeper index chain.
+* Register new docs immediately and check for unregistered files. Remove entries when deleting docs; update all affected links after moves or renames. Expanded content requires checking and updating its task triggers too.
+
+### 5. One authoritative source and corrections
+
+* Maintain each fact, rule or mechanism in one authoritative source; use resolvable pointers where other documents need it. Do not copy changing facts across documents.
+* When confirmed knowledge or terminology changes, correct affected old conclusions and references together. Verify against product decisions, requirements and implementation evidence as appropriate; user-confirmed new requirements can supersede outdated implementation.
+* Mark unresolved contradictions explicitly with the decision needed. Do not present incompatible claims as simultaneously confirmed. Keep corrections bounded to the affected concepts; a small update is not a full-document census.
+
+### 6. Verification and closure
+
+* Re-read changed content, verify entry reachability and links, and check for conflicting statements or lost task triggers. Report unresolved verification limits accurately.
+* Check that promised documentation and reference updates are complete. Report changed document paths and their purpose; if nothing changed, state that no documentation update was needed.
+* Compression must preserve behavior, boundaries, exceptions, evidence and machine-parsed markers. A review stamp is a coverage receipt, not proof of semantic correctness.
 """
 
 VERSION_RE = re.compile(r"<!--\s*doc-governance-version:\s*(\d+)\s*-->")
-# Match English or legacy Chinese section titles for upgrade/removal.
-SECTION_HEADING_RE = re.compile(
-    rf"(^|\n)(## (?:{re.escape(SECTION_TITLE)}|{re.escape(LEGACY_SECTION_TITLE)})\b.*?)(?=\n## |\Z)",
-    re.S,
-)
+def _section_bounds(content: str) -> tuple[int, int] | None:
+    """Find the real managed section, ignoring headings inside fenced examples."""
+    start = None
+    offset = 0
+    fence = None
+    for line in content.splitlines(keepends=True):
+        stripped = line.strip()
+        marker = re.match(r"^(`{3,}|~{3,})", stripped)
+        if marker:
+            token = marker.group(1)
+            if fence is None:
+                fence = token
+            elif token[0] == fence[0] and len(token) >= len(fence) and stripped == token:
+                fence = None
+        elif fence is None:
+            if start is not None and re.match(r"<!--\s*(?:agentsync:begin\b|[\w:-]+:(?:begin|start)\b)", stripped):
+                return start, offset
+            heading = re.match(r"^(#{1,2})[ \t]+(.+?)\s*$", line)
+            if heading:
+                title = heading.group(2).rstrip("#").rstrip()
+                if start is not None:
+                    return start, offset
+                if heading.group(1) == "##" and title in (SECTION_TITLE, LEGACY_SECTION_TITLE):
+                    start = offset
+        offset += len(line)
+    return (start, len(content)) if start is not None else None
 
 
 def _get_installed_version(content: str) -> int | None:
-    """Return the installed version number, or None if unmarked."""
-    m = VERSION_RE.search(content)
+    bounds = _section_bounds(content)
+    if bounds is None:
+        return None
+    m = VERSION_RE.search(content[bounds[0]:bounds[1]])
     return int(m.group(1)) if m else None
 
 
 def _has_section(content: str) -> bool:
-    return f"## {SECTION_TITLE}" in content or f"## {LEGACY_SECTION_TITLE}" in content
+    return _section_bounds(content) is not None
 
 
 def _remove_section(content: str) -> str:
-    """Remove an existing Project Documentation Management section (English or legacy Chinese)."""
-    pattern = re.compile(
-        rf"\n## (?:{re.escape(SECTION_TITLE)}|{re.escape(LEGACY_SECTION_TITLE)})\b.*?(?=\n## |\Z)",
-        re.S,
-    )
-    return pattern.sub("", content)
+    bounds = _section_bounds(content)
+    return content[:bounds[0]] + content[bounds[1]:] if bounds else content
 
 
 def insert(path: str) -> None:
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, "r", encoding="utf-8", newline="") as f:
         content = f.read()
 
     installed = _get_installed_version(content)
@@ -184,7 +146,16 @@ def insert(path: str) -> None:
             )
         else:
             print(f"[upgrade] v{installed} → v{CURRENT_VERSION}: {path}")
-        content = _remove_section(content)
+        bounds = _section_bounds(content)
+        assert bounds is not None
+        # Replace in place so surrounding user rules and external blocks are unchanged.
+        old = content[bounds[0]:bounds[1]]
+        trailing = old[len(old.rstrip("\r\n")):]
+        new_content = content[:bounds[0]] + STANDARD.rstrip("\n") + trailing + content[bounds[1]:]
+        with open(path, "w", encoding="utf-8", newline="") as f:
+            f.write(new_content)
+        print(f"[done] Wrote successfully: {path}")
+        return
     else:
         print(f"[added] Inserting {SECTION_TITLE} v{CURRENT_VERSION}: {path}")
 
@@ -212,7 +183,7 @@ def insert(path: str) -> None:
     else:
         new_content = content.rstrip("\n") + "\n\n" + STANDARD.rstrip("\n") + "\n"
 
-    with open(path, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8", newline="") as f:
         f.write(new_content)
 
     print(f"[done] Wrote successfully: {path}")

@@ -71,8 +71,8 @@ The domain map is Step 8’s **primary deliverable**—produce it before any per
 - Anchor on `project_inventory.py` `submodules` + top-level dirs + `entry_candidates`; decide one by one whether each is an independent domain or a submodule of another.
 - Before building the map, cross-check existing `docs/` `*_KNOWLEDGE_BASE.md` / `*_GUIDE.md` and root `AGENTS.md` nav; domains already covered mark “Generated (reuse existing)”—do not regenerate/rewrite unless content is clearly stale or conflicts with code (then update and explain).
 - Each domain gets evidence anchors (most important dir or entry symbol); if evidence is thin, mark “pending scan”.
-- Status is one of: `Generated (reuse existing)` / `Deep-write this session` / `To be filled`—no “ignore” or “skip”.
-- Map total = generated (reuse + this session) + backlog count; Step 11 self-assessment must state these numbers and verify they equal the total.
+- Report status is one of: `Generated (reuse existing)` / `Deep-write this session` / `To be filled` / `Candidate dead code / implementation drift`—no “ignore” or “skip”. Candidates without product-definition support stay in pending discoveries, receive no KB, and require classification before becoming confirmed domains.
+- Report total = reused + this batch + backlog + candidate drift. Step 11 must reconcile these counts. The persisted coverage map contains confirmed domain/anchor pairs only, without report-status columns; pending discoveries remain explicitly recorded outside that map.
 
 **Selecting this session’s deep-write batch:**
 
@@ -172,3 +172,5 @@ Other convergent rules:
 - With cost / token / time budget, do not start uncontrolled full scans; prioritize a complete domain map and knowledge-boundary report, then decide whether to generate docs.
 - If the user forbids questions, skip Intake and Q&A; write what code cannot see as “low confidence / to be filled” and list risk gaps in self-assessment.
 - If the user forbids questions and multiple business names exist, pick the strongest-evidence canonical term and mark low confidence; do not mix multiple names into body text.
+
+Related-document links inside a KB explain dependencies; they do not replace its root or secondary-index task route. Do not create a competing navigation index in the related-docs section.

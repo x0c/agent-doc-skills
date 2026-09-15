@@ -1,15 +1,13 @@
 ---
 name: doc-init
-description: Initialize a project documentation system. First check and repair the "Project Documentation Management" standard in global AI instruction files, then build an AI-coding-agent-ready domain knowledge network via collaborative Intake, business-domain scanning, hidden-mechanism discovery, optional database evidence mining, and necessary runtime validation. Use when entering a project with no doc structure, or when the global AGENTS.md lacks the doc-governance standard.
+description: Establish or refresh project documentation coverage and install the global documentation lifecycle preset. Use for missing documentation structure, stale domain coverage, or a missing/outdated global documentation contract.
 ---
 
 # Documentation system init (doc-init)
 
-This skill runs in two phases: **repair the global standard first, then initialize the project's docs**.
+This skill runs in two phases: **repair the global standard first, then initialize the project's docs**. Both phases can write files. For an explicitly read-only audit, inspect and report proposed repairs without running the injector or writing project artifacts; do not claim installation or initialization completed.
 
-**Document language:** When writing project docs, follow the project's existing documentation language and the user's language; if neither is clear, default to English.
-
-**Scope reminder:** the block `insert_doc_governance.py` injects covers **documentation structure only**. Language, memory, and review rules belong to the **non-managed** sections of the global AGENTS file (see `docs/SKILLS_GUIDE.md`); never move them back into the injectable STANDARD.
+Apply the installed `Project Documentation Management` lifecycle contract. This skill owns initialization procedures; environment instructions own language, permissions and shared-document locations.
 
 `<DOC_INIT_DIR>` = directory containing this `SKILL.md` (resolve dynamically; do not hard-code absolute paths).
 
@@ -30,6 +28,7 @@ Prefer built-in scripts for mechanical work; keep model context for business jud
 | `scripts/db_miner.py` | Database catalog and domain-level table/field evidence mining |
 | `scripts/git_history_miner.py` | Light Git-history weak-signal mining (hotspots, historical names, Q&A clues) |
 | `scripts/depth_scanner.py` | Deep knowledge extraction: state machines, concurrency, idempotency, events, entity fields, etc. |
+| `scripts/test_insert_doc_governance.py` | Before changing or deploying the injector: upgrade, boundary preservation and idempotence regression checks |
 | `scripts/insert_doc_governance.py` | Version detect + auto insert/upgrade of the "Project Documentation Management" section in global AI instruction files |
 | `scripts/discover_global_instruction_files.py` | List unique real paths of user-level instruction files (follows symlinks); exit `3` if none exist |
 
@@ -70,13 +69,7 @@ python3 <DOC_INIT_DIR>/scripts/insert_doc_governance.py "<real path>"
 | `[added]` / `[done]` | First insert succeeded | Go to Step 3 |
 | `[upgrade]` / `[done]` | Old version replaced | Clean scattered old rules, then Step 3 |
 
-**Only on `[upgrade]` does the model need extra cleanup** (scan and delete; match literal headings that may still be Chinese in older deployments):
-
-- Entire `## AGENTS.md 优先级` / `## AGENTS.md priority` section
-- Under `知识持久化` / `Knowledge persistence`, the `### 检索在先、存储在后` / `### Retrieve first, store later` subsection
-- Other scattered paragraphs themed around doc placement, doc index, AGENTS.md navigation, or the docs/ directory
-
-Keep: the rest of the knowledge-persistence section (rules that disable memory) and all non-doc-related sections.
+After an upgrade, migrate only duplicate clauses explicitly identified in the current task's reviewed migration inventory. Preserve unrelated global content; never delete paragraphs merely because they mention documentation. The injector replaces its own block only.
 
 ### Step 3 — Phase 1 report
 
@@ -181,43 +174,11 @@ This stage only: table list, field list, PK/indexes and comments—no full-DB co
 
 If connection is missing or the user forbids it, mark “Missing real data semantics” in the knowledge-boundary report and self-assessment.
 
-### Step 8.7 — Domain-map confirmation and deep-write priority negotiation (interaction gate)
+### Step 8.7 — Confirm domain boundaries and priorities
 
-**Unless the user explicitly forbids questions**, after the knowledge-boundary report and before Step 9, confirm the domain map with the user. **Prefer the environment’s built-in choice tool** (e.g. `AskUserQuestion`); fall back to open text questions only when needed.
+Show the complete map once: covered domains, this batch with reasons, and backlog with entry anchors. Ask only about unresolved boundaries or priorities that materially change the work; use existing product decisions and user answers first. Do not ask permission to scan, repeatedly confirm each KB, or re-ask an accepted choice.
 
-**Stepwise choices:**
-
-**Step 1: Show the whole domain map at once, then confirm the boundaries**
-
-First print the full domain map in plain text, short enough to read on one screen, grouped in three segments: `Covered by existing docs (A)` → `Deep-write this session (M, with reasons)` → `Backlog (K, with anchors)`.
-
-Then ask with a structured choice tool:
-
-| Question | Options |
-|------|------|
-| Does domain partitioning need adjustment? | ① Partitioning looks good, continue (recommended) / ② Need to split a domain / ③ Need to merge domains / ④ Need to delete a domain (abandoned code) |
-
-**Step 2: Confirm deep-write priority** (only after Step 1 chose “partitioning looks good”)
-
-| Question | Options |
-|------|------|
-| Does deep-write priority need adjustment? | ① Current order is fine (recommended) / ② I often change a certain area lately—move it up / ③ Something in backlog should be deep-written earlier |
-
-**Design principles:**
-
-- Put the recommended option first and label it “recommended”; in most cases the user confirms and proceeds
-- No thrashing across steps: if Step 1 needs boundary changes, after adjusting go straight to Step 9—do not ask Step 2 (changed boundaries imply priority must be re-ranked anyway)
-
-**Behavior after user choice:**
-
-| User choice | Behavior |
-|---------|------|
-| Both steps choose recommended | Enter Step 9 with current map and priority |
-| Ask to split/merge/delete | Adjust map, **no second confirmation**, enter Step 9 |
-| Adjust priority | Reorder as specified, enter Step 9 |
-| Tool unsupported / timeout / no reply | Continue with model judgment |
-
-**Forbidden anti-patterns:** asking “is this KB correct?” after every KB; asking “is this important?” after every pattern found; “I’m about to scan—confirm?”; second-guessing “are you sure?” after the user already confirmed.
+Apply requested adjustments and continue. If optional feedback is unavailable, proceed with stated assumptions; unresolved product-definition requirements still follow Step 7a's gate.
 
 ### Step 9 — Targeted Q&A and doc generation
 
@@ -251,7 +212,7 @@ Read precise Q&A rules in `references/human-intake.md`; read `references/documen
 python3 <DOC_INIT_DIR>/scripts/upsert_agents_nav.py --root . --path docs/<DOMAIN>_KNOWLEDGE_BASE.md --when-to-read "<task trigger phrase>"
 ```
 
-`--when-to-read` only lists business-scope keywords covered by that doc (e.g. “customer profile changes, status transitions, batch tags”)—do not repeat “must read before changing, reviewing, or troubleshooting…” on every line; declare the shared trigger pattern once in the nav section header.
+`--when-to-read` supplies the complete route: applicable tasks and business scope; for important normative docs include **must read + trigger + consequence** in each entry. The helper formats supplied text; it does not infer importance or add missing requirements.
 
 **Register backlog** (after the main batch, register all pending domains—never silently drop):
 
@@ -301,6 +262,8 @@ Generation conditions:
 
 ### Step 11 — Self-assessment report
 
+Report batch completion separately from project-wide coverage, backlog count and unverified evidence. Finishing the agreed batch does not mean the whole project is fully documented.
+
 First run doc-nav consistency check:
 
 ```bash
@@ -330,23 +293,6 @@ Self-assessment must also cover (item by item—not one vague paragraph):
 - Operations validation coverage (which steps executed; which remain low-confidence hypotheses)
 - Follow-up persistence suggestions (what doc-update should fill; what suits doc-compact)
 
-### Step 12 — Deeper-investigation proposals (mandatory; do not skip)
+### Step 12 — Close or offer concrete remaining work
 
-After self-assessment, **must** propose at least 3 directions for further investigation. **Use a structured multi-select tool** (e.g. `AskUserQuestion multiSelect: true`); each option format: `[domain/mechanism] — [current state] — [what can continue]`.
-
-Proposal sources (must be based on this session’s real findings—do not invent):
-
-- Quality-gate items marked “remediate” or “template-level”
-- depth_scanner signals “discarded / unconfirmed”
-- §6 items marked “low confidence”
-- 1–2 backlog domains most tightly coupled to already deep-written domains
-- Cross-domain event/MQ linkages not expanded
-- §7 validation paths that are only templates, missing real parameters
-
-**After user selection:**
-
-- ≥ 2 independent directions → dispatch sub-agents in parallel; serialize dependent preambles first
-- 1 direction → main Agent executes directly
-- After each round, propose again (keep using multi-select) until the user stops
-
-**After each deeper round, mandatory updates:** domain-map section status, backlog section, doc nav, plus a 1–2 line incremental summary (e.g. “map 8 domains: deep-written 4 → 5”).
+After verification, report completion of the agreed batch and any evidence-backed gaps. Offer further investigation only where real findings justify it; there is no minimum number of proposals and no repeat-until-stopped loop. User-selected independent directions may run in parallel; serialize dependencies and update the map, backlog and navigation after each accepted batch.
