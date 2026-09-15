@@ -1,9 +1,9 @@
 # doc-skills
 
-Every new Claude Code session, your agent forgets the project and rediscovers it from scratch. These skills build a small, navigable project documentation system — a knowledge base the next agent can pick up cold.
+Every new coding-agent session, your agent forgets the project and rediscovers it from scratch. These skills build a small, navigable project documentation system — a knowledge base the next agent can pick up cold.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-Skills-5A67D8?logo=anthropic&logoColor=white)](https://claude.ai/code)
+[![Agent Skills](https://img.shields.io/badge/Agent_Skills-Cursor%20%7C%20Claude%20Code%20%7C%20Codex-5A67D8)](https://agentskills.io)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)](https://python.org)
 
 **Languages:** [English](#english) | [中文](#中文)
@@ -19,14 +19,22 @@ AI coding agents waste time (and make mistakes) re-discovering the same project 
 
 ### Quick Install
 
-```bash
-git clone https://github.com/x0c/doc-skills.git ~/.claude/skills/doc-skills
+macOS, Linux, and Windows. Needs [Node.js](https://nodejs.org/) for the one-liner, and Python 3.8+ when the skills run.
 
-# Or copy individual skill folders
-cp -r doc-skills/doc-init doc-skills/doc-compact doc-skills/doc-update ~/.claude/skills/
+```bash
+npx skills add x0c/doc-skills -g
 ```
 
-Restart Claude Code. Each skill's entry point is its `SKILL.md`.
+That installs `doc-init`, `doc-compact`, and `doc-update` for the Agent Skills hosts on this machine (Cursor, Claude Code, Codex, and others). Start a new chat afterwards.
+
+Without Node.js, copy the three skill folders into your host’s skills directory:
+
+```bash
+git clone https://github.com/x0c/doc-skills.git
+cp -r doc-skills/doc-init doc-skills/doc-compact doc-skills/doc-update ~/.cursor/skills/
+```
+
+Use `~/.claude/skills/` or `~/.codex/skills/` instead if that is the host you run.
 
 ---
 
@@ -38,7 +46,7 @@ Bootstraps a full documentation system for a project from scratch. The overall d
 
 **Phase 1 — Global governance check**
 
-Before touching any project files, `doc-init` detects the active global AI instruction files (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, etc.) and uses a versioned script (`insert_doc_governance.py`) to install or upgrade the doc-management standard. This ensures all future agents operate under consistent rules regardless of which project they're in.
+Before touching any project files, `doc-init` discovers the active global AI instruction files (Claude Code, Codex, Cursor-compatible `~/.agents/AGENTS.md`, OpenCode, and similar) and uses a versioned script (`insert_doc_governance.py`) to install or upgrade the doc-management standard. This ensures all future agents operate under consistent rules regardless of which project they're in.
 
 **Phase 2 — Project documentation initialization**
 
@@ -90,7 +98,7 @@ Distills reusable findings from a completed session into the right destination. 
 
 1. **Skip check** — if the session was pure Q&A, all findings already exist in docs, or the information is session-only, the skill exits cleanly. No-op is a valid outcome.
 
-2. **Extract reusable findings** — reviews the session for: new business rules or architectural constraints, bugs hit (root cause + fix), validated patterns, user corrections or preferences, code changes that invalidated existing docs, and (critically) any navigation failures — cases where an agent searched for a document and couldn't find it or found the wrong one. Navigation failures are the most actionable signal: they mean the index description is missing a task-type trigger.
+2. **Extract reusable findings** — reviews the session for: new business rules or architectural constraints, bugs hit (root cause + fix), validated patterns, user corrections or preferences, code changes that invalidated existing docs, environment friction that perfect docs cannot remove, and (critically) any navigation failures — cases where an agent searched for a document and couldn't find it or found the wrong one. Navigation failures are the most actionable signal: they mean the index description is missing a task-type trigger.
 
 3. **Route to the right destination** — a decision tree maps finding types to target locations:
    - Cross-project patterns / scripts / checklists → the relevant skill file
@@ -167,7 +175,8 @@ doc-init/
     ├── upsert_agents_nav.py        # idempotent AGENTS.md nav entry writer
     ├── git_history_miner.py        # hotspots, fix/revert patterns
     ├── db_miner.py                 # database catalog and field semantics
-    └── insert_doc_governance.py    # versioned global instruction file installer
+    ├── insert_doc_governance.py    # versioned global instruction file installer
+    └── discover_global_instruction_files.py  # locate user-level instruction files
 
 doc-compact/
 ├── SKILL.md
@@ -192,20 +201,28 @@ MIT
 
 ### 为什么需要它
 
-每次新开 Claude Code 会话，Agent 都会忘掉这个项目、从头再摸一遍。这套技能帮你建一套小而可导航的项目文档——下一任 Agent 冷启动就能接手的知识库。
+每次新开编码 Agent 会话，都会忘掉这个项目、从头再摸一遍。这套技能帮你建一套小而可导航的项目文档——下一任 Agent 冷启动就能接手的知识库。
 
 AI Coding Agent 每次接手都在重新发现：哪个模块归谁管、哪些字段名不能按字面理解、哪些副作用代码里根本看不出来。`doc-skills` 把这些经验沉淀成一套小而精、可导航的文档体系，让任何 Agent 接手都能直接开工，并随代码演进持续保鲜。
 
 ### 快速安装
 
-```bash
-git clone https://github.com/x0c/doc-skills.git ~/.claude/skills/doc-skills
+macOS、Linux、Windows。一键安装需要 [Node.js](https://nodejs.org/)；技能运行需要 Python 3.8+。
 
-# 或只复制需要的 skill
-cp -r doc-skills/doc-init doc-skills/doc-compact doc-skills/doc-update ~/.claude/skills/
+```bash
+npx skills add x0c/doc-skills -g
 ```
 
-重启 Claude Code 即可，每个 skill 的入口是其 `SKILL.md`。
+会把 `doc-init`、`doc-compact`、`doc-update` 装到本机已有的 Agent Skills 宿主（Cursor、Claude Code、Codex 等）。装完新开一个对话。
+
+没有 Node.js 时，把三个 skill 目录拷进宿主的 skills 目录：
+
+```bash
+git clone https://github.com/x0c/doc-skills.git
+cp -r doc-skills/doc-init doc-skills/doc-compact doc-skills/doc-update ~/.cursor/skills/
+```
+
+若你用的是 Claude Code 或 Codex，把目标目录换成 `~/.claude/skills/` 或 `~/.codex/skills/`。
 
 ---
 
@@ -322,7 +339,8 @@ doc-init/
     ├── upsert_agents_nav.py          # 幂等写入 AGENTS.md 导航条目
     ├── git_history_miner.py          # 热点、fix/revert 规律
     ├── db_miner.py                   # 数据库目录和字段语义
-    └── insert_doc_governance.py      # 版本化全局指令文件安装器
+    ├── insert_doc_governance.py      # 版本化全局指令文件安装器
+    └── discover_global_instruction_files.py  # 探测用户级指令文件
 
 doc-compact/
 ├── SKILL.md
