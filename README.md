@@ -1,4 +1,4 @@
-# doc-skills
+# agent-doc-skills
 
 Every new coding-agent session, your agent forgets the project and rediscovers it from scratch. These skills build a small, navigable project documentation system — a knowledge base the next agent can pick up cold.
 
@@ -15,14 +15,14 @@ Every new coding-agent session, your agent forgets the project and rediscovers i
 
 ### Why this exists
 
-AI coding agents waste time (and make mistakes) re-discovering the same project context every session: which module owns what, which fields lie, which side effects aren't visible in the code. `doc-skills` turns that tribal knowledge into a small, navigable documentation system that any agent can pick up cold — and keeps it from rotting as the codebase changes.
+AI coding agents waste time (and make mistakes) re-discovering the same project context every session: which module owns what, which fields lie, which side effects aren't visible in the code. `agent-doc-skills` turns that tribal knowledge into a small, navigable documentation system that any agent can pick up cold — and keeps it from rotting as the codebase changes.
 
 ### Quick Install
 
 macOS, Linux, and Windows. Needs [Node.js](https://nodejs.org/) for the one-liner, and Python 3.8+ when the skills run.
 
 ```bash
-npx skills add x0c/doc-skills -g
+npx skills add x0c/agent-doc-skills -g
 ```
 
 That installs `doc-init`, `doc-compact`, and `doc-update` for the Agent Skills hosts on this machine (Cursor, Claude Code, Codex, and others). Start a new chat afterwards.
@@ -30,8 +30,8 @@ That installs `doc-init`, `doc-compact`, and `doc-update` for the Agent Skills h
 Without Node.js, copy the three skill folders into your host’s skills directory:
 
 ```bash
-git clone https://github.com/x0c/doc-skills.git
-cp -r doc-skills/doc-init doc-skills/doc-compact doc-skills/doc-update ~/.cursor/skills/
+git clone https://github.com/x0c/agent-doc-skills.git
+cp -r agent-doc-skills/doc-init agent-doc-skills/doc-compact agent-doc-skills/doc-update ~/.cursor/skills/
 ```
 
 Use `~/.claude/skills/` or `~/.codex/skills/` instead if that is the host you run.
@@ -203,14 +203,14 @@ MIT
 
 每次新开编码 Agent 会话，都会忘掉这个项目、从头再摸一遍。这套技能帮你建一套小而可导航的项目文档——下一任 Agent 冷启动就能接手的知识库。
 
-AI Coding Agent 每次接手都在重新发现：哪个模块归谁管、哪些字段名不能按字面理解、哪些副作用代码里根本看不出来。`doc-skills` 把这些经验沉淀成一套小而精、可导航的文档体系，让任何 Agent 接手都能直接开工，并随代码演进持续保鲜。
+AI Coding Agent 每次接手都在重新发现：哪个模块归谁管、哪些字段名不能按字面理解、哪些副作用代码里根本看不出来。`agent-doc-skills` 把这些经验沉淀成一套小而精、可导航的文档体系，让任何 Agent 接手都能直接开工，并随代码演进持续保鲜。
 
 ### 快速安装
 
 macOS、Linux、Windows。一键安装需要 [Node.js](https://nodejs.org/)；技能运行需要 Python 3.8+。
 
 ```bash
-npx skills add x0c/doc-skills -g
+npx skills add x0c/agent-doc-skills -g
 ```
 
 会把 `doc-init`、`doc-compact`、`doc-update` 装到本机已有的 Agent Skills 宿主（Cursor、Claude Code、Codex 等）。装完新开一个对话。
@@ -218,8 +218,8 @@ npx skills add x0c/doc-skills -g
 没有 Node.js 时，把三个 skill 目录拷进宿主的 skills 目录：
 
 ```bash
-git clone https://github.com/x0c/doc-skills.git
-cp -r doc-skills/doc-init doc-skills/doc-compact doc-skills/doc-update ~/.cursor/skills/
+git clone https://github.com/x0c/agent-doc-skills.git
+cp -r agent-doc-skills/doc-init agent-doc-skills/doc-compact agent-doc-skills/doc-update ~/.cursor/skills/
 ```
 
 若你用的是 Claude Code 或 Codex，把目标目录换成 `~/.claude/skills/` 或 `~/.codex/skills/`。
