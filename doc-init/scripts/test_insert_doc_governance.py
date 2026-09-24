@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 NS = runpy.run_path(str(Path(__file__).with_name("insert_doc_governance.py")))
-OLD = "## Project Documentation Management\n<!-- doc-governance-version: 16 -->\nOld rule.\n\n"
+OLD = "## Project Documentation Management\n<!-- doc-governance-version: 17 -->\nOld rule.\n\n"
 
 class UpgradeTests(unittest.TestCase):
     def upgrade(self, content):
@@ -75,7 +75,17 @@ class UpgradeTests(unittest.TestCase):
 
     def test_unrelated_version_marker_does_not_block_install(self):
         result = self.upgrade("# Other\n<!-- doc-governance-version: 99 -->\n")
-        self.assertIn("<!-- doc-governance-version: 17 -->", result)
+        self.assertIn("<!-- doc-governance-version: 19 -->", result)
+
+    def test_v17_upgrade_has_new_index_contract(self):
+        result = self.upgrade(OLD + "## Adjacent\nKEEP\n")
+        self.assertIn("doc-governance-version: 19", result)
+        self.assertIn("Describe the document's actual content precisely and concisely", result)
+        self.assertIn("Add one shared instruction to the `AGENTS.md` document navigation", result)
+        self.assertIn("dedicated `agents-md-maintenance` skill", result)
+        self.assertNotIn("must read + trigger + consequence", result)
+        self.assertNotIn("Language policy:", result)
+        self.assertTrue(result.endswith("## Adjacent\nKEEP\n"))
 
 if __name__ == "__main__":
     unittest.main()

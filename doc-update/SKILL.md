@@ -5,7 +5,7 @@ description: Persist reusable findings and product decisions, repair stale docum
 
 # Documentation updates
 
-Apply the documentation lifecycle contract in the installed `Project Documentation Management` block. This skill supplies the bounded update procedure; environment instructions own language, permissions and shared-document locations.
+Apply the documentation lifecycle contract in the installed `Project Documentation Management` block. This skill supplies the bounded update procedure; environment instructions own language, permissions and shared-document locations. When `AGENTS.md` needs a deliberate edit, route one bounded change set through the dedicated `agents-md-maintenance` skill; the coordinator integrates and verifies it. If unavailable, report the missing capability.
 
 ## 1. Gather and filter
 
@@ -47,8 +47,8 @@ Prefer updating an existing authority. If none exists, use the project's registe
 For each added, moved, renamed, expanded or previously missed doc:
 
 - Ensure exactly one navigation entry at the root or a registered secondary index. Nearby rule pointers may coexist with that entry.
-- Describe applicable tasks and domain triggers. Important normative docs need their own **must read + trigger + consequence**; do not rely on a shared preamble.
-- Include the actual task that exposed a routing gap. Preserve valid coverage while consolidating repeated wording or removing obsolete triggers.
+- Describe each document's actual content precisely and concisely. Keep one shared index instruction to read documents whose described content is relevant to the current task; do not turn entries into trigger lists or duplicate policy.
+- Update the content summary when document contents change. Preserve valid entries while merging duplicates or removing stale summaries.
 - Synchronize old references after moves/deletions and add nearby pointers where the doc supports a rule.
 - Keep direct links unless a group makes navigation difficult to scan. Three records alone do not require a secondary index; use doc-compact for large-scale restructuring.
 

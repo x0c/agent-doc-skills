@@ -5,7 +5,7 @@ description: Audit and compress bloated project documentation while preserving b
 
 # doc-compact
 
-Apply the installed `Project Documentation Management` lifecycle contract. Environment instructions own language, permissions, model selection and shared-document locations.
+Apply the installed `Project Documentation Management` lifecycle contract. Environment instructions own language, permissions, model selection and shared-document locations. Route deliberate `AGENTS.md` edits, including navigation and compression, through the dedicated `agents-md-maintenance` skill as one bounded change set; the coordinator integrates and verifies the result. If unavailable, report the missing capability.
 
 Before running, discover the files that are actually in effect—do not hardcode paths.
 `<DOC_INIT_DIR>` defaults to a sibling of this skill: `<directory of this SKILL.md>/../doc-init`
@@ -68,13 +68,13 @@ Default is a single flat layer. **Prefer not to add levels**—each extra hop mu
 
 Fold only when a group makes navigation hard to scan. A large navigation share, >500 root lines, or ≥3 related incident/review records are audit signals, not automatic triggers. Keep direct links when they remain clear.
 
-When folding, root links a named `<DOMAIN>_INDEX.md`, which links original docs with independently actionable routes. State whether the index is merely a pointer and when it may be skipped. No third hop. Incidents in `operations/` also count as candidates; prefer a pointer index over moving files and changing every reference.
+When folding, root links a named `<DOMAIN>_INDEX.md`, which links original docs with concise content summaries. Keep one shared relevance instruction in root `AGENTS.md` document navigation. No third hop. Incidents in `operations/` also count as candidates; prefer a pointer index over moving files and changing every reference.
 
 ## Step 4 — Fix structure
 
 - **CLAUDE.md:** not a single line → restore `@AGENTS.md`; only an injection block with no content → delete the dangling CLAUDE.md too
 - **Doc naming/placement:** align with rules (knowledge bases/guides `SCREAMING_SNAKE_CASE`, design/review `kebab-case`, troubleshooting `YYYY-MM-DD-*`); review moves/renames against task authorization, then sync whole-repo references
-- **Navigation blurbs:** check each line is “when to read” vs “what it is about”—the latter routes poorly; rewrite to the former; triggers must cover all task types (change / create / review / troubleshoot / optimize)
+- **Navigation summaries:** describe each document's actual content precisely and concisely; keep one shared relevance instruction in root `AGENTS.md` document navigation and remove trigger lists or duplicated policy
 - **Index rebuild:** list only real docs, cluster by domain, high-frequency first; drop dead links/empty placeholders; skip protected sections; preserve 🔒 managed blocks from J verbatim
 - **Unmanaged legacy injection / bare indexes:** identify rules, check existing coverage, then merge uncovered valid content and remove only authorized redundant material. This does not apply to the generated `Project Documentation Management` section or any managed block: preserve those and fix their source instead.
 - **Inherited instructions:** identify their generating source and any reinjection hook. Fix broken routes in the source; do not erase a managed block or edit only its generated copy. Without a generating mechanism, remove a redundant block only after its still-valid rules remain reachable and the removal is authorized.

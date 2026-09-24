@@ -21,7 +21,7 @@ from typing import Any
 DOC_LINK_RE = re.compile(r"(?:\[[^\]]+\]\()?`?(\.?/?(?:docs|specs)/[^\s`)]+?\.md)`?\)?")
 GLOBAL_REF_RE = re.compile(r"(@?\s*(?:~|\$HOME|/Users/[^/\s`，。；；、)]+)/(?:\.claude|\.codex|\.config/opencode|\.agents|\.config/agentsync)/[^\s`，。；；、)]+)", re.I)
 NEGATIVE_EXAMPLE_RE = re.compile(r"(不要|不应|禁止|例如|示例|常见路径|路径形态|不是)")
-SELF_NAV_RE = re.compile(r"(何时该读|什么时候该读|前必读|前读|必读)")
+SELF_NAV_RE = re.compile(r"(何时(?:该|需要)?阅读|何时(?:该|需要)?读|when to read|read this document before|before reading this document)", re.I)
 FORBIDDEN_INDEX_NAMES = {"TABLE_INDEX.md", "CODE_INDEX.md"}
 
 # doc-init bookkeeping headings in root AGENTS.md; these two sections are the
@@ -29,6 +29,12 @@ FORBIDDEN_INDEX_NAMES = {"TABLE_INDEX.md", "CODE_INDEX.md"}
 # fold, or rewrite them when compacting.
 DOMAIN_MAP_HEADING_RE = re.compile(r"^(#{1,4})\s*领域地图（doc-init）\s*$", re.M)
 BACKLOG_HEADING_RE = re.compile(r"^(#{1,4})\s*待补充知识库（doc-init backlog）\s*$", re.M)
+INDEX_HEADING_RE = re.compile(r"^(#{1,4})\s*(?:文档导航|规则索引|Document(?:ation)? index)\s*$", re.I | re.M)
+SHARED_INDEX_RULE_RE = re.compile(
+    r"(?ix)(?=.*\b(?:read|consult)\b)(?=.*\b(?:documents?|docs?)\b)(?=.*\b(?:relevant|applicable)\b)|"
+    r"(?=.*\bread\b)(?=.*\bdocuments?\b)(?=.*\bcover\b)(?=.*\bcurrent\s+(?:work|task)\b)|"
+    r"(?=.*(?:阅读|读取|查阅))(?=.*(?:文档|文件))(?=.*(?:相关|适用))"
+)
 
 PRUNE_DIR_NAMES = {
     "node_modules", "target", "build", "dist", "out", ".build",
@@ -111,8 +117,22 @@ def lint(root: Path) -> dict[str, Any]:
     else:
         agents_text = agents.read_text(encoding="utf-8", errors="ignore")
         protected_info = find_protected_sections(agents_text)
-        if "文档导航" not in agents_text:
-            add_issue(issues, "error", "missing-doc-nav", "AGENTS.md is missing the 「文档导航」 section", "AGENTS.md")
+        index_headings = list(INDEX_HEADING_RE.finditer(agents_text))
+        if not index_headings:
+            add_issue(issues, "error", "missing-doc-nav", "AGENTS.md is missing a document navigation or document index section", "AGENTS.md")
+        if index_headings:
+            instruction_count = 0
+            for index in index_headings:
+                end = re.search(rf"^#{{1,{len(index.group(1))}}}\s+\S.*$", agents_text[index.end():], re.M)
+                section_end = index.end() + end.start() if end else len(agents_text)
+                section = agents_text[index.start():section_end]
+                instruction_count += sum(
+                    1 for line in section.splitlines() if SHARED_INDEX_RULE_RE.search(line)
+                )
+            if instruction_count != 1:
+                code = "missing-index-relevance-rule" if instruction_count == 0 else "duplicate-index-relevance-rule"
+                message = "document index should contain exactly one shared relevance instruction"
+                add_issue(issues, "warning", code, message, "AGENTS.md", line_number(agents_text, index_headings[0].start()))
         for current_line, line in enumerate(agents_text.splitlines(), start=1):
             if NEGATIVE_EXAMPLE_RE.search(line):
                 continue

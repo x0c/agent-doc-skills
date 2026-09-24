@@ -69,7 +69,7 @@ Must not include:
 
 - Domain-specific API curls, business table/field checks, state-machine validation—those belong in the corresponding KB.
 - Full project module/package structure or tech-stack encyclopedia—those belong in root `AGENTS.md`, domain KBs, or specialized Guides.
-- Self-routing “when to read / must read” sentences—routing only in root `AGENTS.md`.
+- Self-routing instructions that duplicate the shared index rule; concise content descriptions belong in root `AGENTS.md`.
 - Unevidenced ops history, real incident ledgers, production deploy details.
 - Writing static guesses as verified facts; every start command, port, and config-load method not runtime-validated must be marked “pending validation”.
 

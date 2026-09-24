@@ -23,7 +23,7 @@ the next doc-init run will detect and upgrade already-deployed older versions.
 import sys
 import re
 
-CURRENT_VERSION = 17
+CURRENT_VERSION = 19
 
 # Heading used in the injectable STANDARD (English for open-source inject).
 SECTION_TITLE = "Project Documentation Management"
@@ -64,11 +64,12 @@ STANDARD = f"""## {SECTION_TITLE}
 
 ### 4. Navigation and indexes
 
-* Each long-lived doc has one navigation entry at the root or its registered secondary index. Write when to read it, covering applicable task types and domain triggers, not merely its contents or a technology already present in code.
-* Important normative docs need an independently actionable **must read + trigger + consequence** entry. Preserve equivalent strength in secondary indexes and nearby pointers; a shared preamble cannot replace individual mandatory routes. Ordinary references need not claim mandatory status.
+* Each long-lived doc has one navigation entry at the root or its registered secondary index. Describe the document's actual content precisely and concisely; do not turn entries into trigger lists or duplicate the document body.
+* Add one shared instruction to the `AGENTS.md` document navigation: read documents whose described content is relevant to the current task. Keep individual entries descriptive rather than repeating this routing rule.
+* When a deliberate `AGENTS.md` edit is needed, route the edit through the dedicated `agents-md-maintenance` skill; documentation skills retain lifecycle decisions and verify the result. If that capability is unavailable, report the limitation rather than editing around it.
 * Put a pointer beside a rule it supports. This may coexist with the doc's single navigation entry.
 * Default to direct root links. Add a named `<DOMAIN>_INDEX.md` only when a group makes navigation hard to scan; counts and line limits are audit signals, not automatic restructuring commands. Root then links the index and the index links the documents. No deeper index chain.
-* Register new docs immediately and check for unregistered files. Remove entries when deleting docs; update all affected links after moves or renames. Expanded content requires checking and updating its task triggers too.
+* Register new docs immediately and check for unregistered files. Remove entries when deleting docs; update all affected links after moves or renames. Expanded content requires updating its content summary too.
 
 ### 5. One authoritative source and corrections
 
@@ -78,7 +79,7 @@ STANDARD = f"""## {SECTION_TITLE}
 
 ### 6. Verification and closure
 
-* Re-read changed content, verify entry reachability and links, and check for conflicting statements or lost task triggers. Report unresolved verification limits accurately.
+* Re-read changed content, verify entry reachability and links, and check for conflicting statements or missing content summaries. Report unresolved verification limits accurately.
 * Check that promised documentation and reference updates are complete. Report changed document paths and their purpose; if nothing changed, state that no documentation update was needed.
 * Compression must preserve behavior, boundaries, exceptions, evidence and machine-parsed markers. A review stamp is a coverage receipt, not proof of semantic correctness.
 """

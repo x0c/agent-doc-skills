@@ -297,7 +297,7 @@ python3 <DOC_INIT_DIR>/scripts/upsert_agents_nav.py \
   --backlog \
   --name "<domain> KB" \
   --anchor "<entry dir or file>" \
-  --when-to-read "<before changing/troubleshooting this feature>"
+  --summary "<concise summary of the document content>"
 ```
 
 The script creates the section and the entries itself; its heading and the `[待补充]` (pending) item prefix are literal detection keys, so do not hand-translate or hand-write them:
@@ -305,10 +305,10 @@ The script creates the section and the entries itself; its heading and the `[待
 ```
 ## 待补充知识库（doc-init backlog）
 
-- [待补充] Channel system KB —— 入口锚点：src/channels/；触发场景：before changing/troubleshooting any channel integration.
-- [待补充] Plugin system KB —— 入口锚点：src/plugins/；触发场景：before developing or troubleshooting plugin registration and lifecycle.
+- [待补充] Channel system KB — Entry anchor: src/channels/; Content summary: channel configuration, routing behavior, and delivery failures.
+- [待补充] Plugin system KB — Entry anchor: src/plugins/; Content summary: plugin registration, lifecycle, and configuration.
 ```
 
-Only `--name` / `--anchor` / `--when-to-read` are yours to write, in the project’s doc language.
+Only `--name` / `--anchor` / `--summary` are content supplied by the writer, in the project’s doc language.
 
 Step 11 self-assessment must report: map total / generated this session / backlog count, and assert the sum is correct (generated + backlog = total).

@@ -11,7 +11,7 @@ Apply the installed `Project Documentation Management` lifecycle contract. This 
 
 `<DOC_INIT_DIR>` = directory containing this `SKILL.md` (resolve dynamically; do not hard-code absolute paths).
 
-**Literal detection keys:** a few strings written into a project's root `AGENTS.md` are parsed by the scripts in this skill (and protected by `doc-compact`): the section headings `## 领域地图（doc-init）` (domain map), `## 待补充知识库（doc-init backlog）` (pending knowledge bases), `## 文档导航` (documentation navigation), the `覆盖度复核基线` (coverage-review baseline) stamp, and that map table's two column titles. Reproduce them **verbatim**, including full-width parentheses, whatever language the project's docs are written in—translating them silently breaks the coverage gate and the lint checks. Everything else (domain names, anchors, trigger phrases, body text) follows the project's documentation language.
+**Literal detection keys:** a few strings written into a project's root `AGENTS.md` are parsed by the scripts in this skill (and protected by `doc-compact`): the section headings `## 领域地图（doc-init）` (domain map), `## 待补充知识库（doc-init backlog）` (pending knowledge bases), `## 文档导航` (documentation navigation), the `覆盖度复核基线` (coverage-review baseline) stamp, and that map table's two column titles. Reproduce them **verbatim**, including full-width parentheses, whatever language the project's docs are written in—translating them silently breaks the coverage gate and the lint checks. Everything else (domain names, anchors, content summaries, body text) follows the project's documentation language.
 
 ---
 
@@ -23,7 +23,7 @@ Prefer built-in scripts for mechanical work; keep model context for business jud
 |------|------|
 | `scripts/project_inventory.py` | Scan language stack, build files, submodules, docs, configs, entry candidates; emits candidate facts only—does not decide business domains |
 | `scripts/doc_coverage.py` | Coverage gate: code function entries vs map-anchor match + fingerprint baseline; exit codes `COMPLETE(0)/STALE(2)/NEEDS_INIT(3)` |
-| `scripts/upsert_agents_nav.py` | Idempotent add/update of root `AGENTS.md` doc-nav entries |
+| `scripts/upsert_agents_nav.py` | Idempotent add/update of root `AGENTS.md` document-content summaries |
 | `scripts/doc_nav_lint.py` | Check root `AGENTS.md`, `CLAUDE.md`, `docs/` nav consistency |
 | `scripts/db_miner.py` | Database catalog and domain-level table/field evidence mining |
 | `scripts/git_history_miner.py` | Light Git-history weak-signal mining (hotspots, historical names, Q&A clues) |
@@ -160,7 +160,7 @@ python3 <DOC_INIT_DIR>/scripts/depth_scanner.py --root . --inventory .doc-init-p
 
 Read `references/depth-patterns.md` and turn depth_scanner mechanical signals into per-domain knowledge candidates (see that file’s signal→KB section mapping). Discard false positives—do not copy mechanically.
 
-If the environment supports parallelism and the user has not restricted it, **explore in parallel aggressively**: candidate-domain code-entry exploration can run concurrently; assign each sub-agent boundaries by business domain (not by module).
+If the environment supports parallelism and the user has not restricted it, candidate-domain code-entry exploration may run concurrently; assign each worker boundaries by business domain (not by module).
 
 After identifying the language stack, read matching docs under `references/hidden-semantics/` as needed (language list in `references/scan-and-boundary-report.md` “Language stacks and hidden semantics”).
 
@@ -186,47 +186,47 @@ Read precise Q&A rules in `references/human-intake.md`; read `references/documen
 
 **Timing constraints (strict order):**
 
-1. **Q&A before sub-agent dispatch:** The main Agent does one concentrated Q&A round for all domains in this deep-write main batch (unless the user forbids questions). Focus on what code cannot see but that affects whether AI can change code correctly (business peaks, which channels fail most, approval flows, historical conventions).
-2. **Prompt assembly:** Read `references/sub-agent-prompt-template.md`; for each deep-write domain assemble a structured prompt (domain definition + entry inventory + depth_scanner signals + canonical terms + Q&A results + quality gates). **Forbidden:** giving sub-agents only a vague “deep-write domain X”—vague prompts yield skeleton docs; structured prompts yield usable docs.
-3. **Dispatch sub-agents** (if supported and main batch ≥ 2 domains): weakly coupled domains may run in parallel; if domain A depends on domain B’s shared mechanism, serialize.
-4. **Aggregation** (main Agent must run after all sub-agents return):
+1. **Q&A before dispatch:** Complete one concentrated Q&A round for all domains in this deep-write batch (unless the user forbids questions). Focus on what code cannot show but affects correct implementation (business peaks, failure patterns, approval flows, historical conventions).
+2. **Work planning:** Read `references/sub-agent-prompt-template.md`; for each deep-write domain assemble a structured work brief (domain definition + entry inventory + depth_scanner signals + canonical terms + Q&A results + quality gates). A vague “deep-write domain X” brief is insufficient.
+3. **Dispatch work** (if supported and main batch ≥ 2 domains): weakly coupled domains may run in parallel; if domain A depends on domain B’s shared mechanism, serialize.
+4. **Aggregation** (the coordinator completes after assigned work returns):
    - Shared-mechanism extraction check: same mechanism described in ≥ 2 KBs → decide whether to extract a `*_GUIDE.md`
    - Cross-reference alignment: each KB §8 references cross-domain relations
    - Canonical-term consistency: same concept uses the same canonical term across KBs
    - Ops cheat-sheet merge: multi-host module projects enumerate ports one by one
 
-**Forbidden during parallelism:** sub-agents must not modify root `AGENTS.md`, other domains’ KBs, or shared Guides—the main Agent does those in aggregation.
+**Root file boundary:** workers must not modify root `AGENTS.md`; the coordinator hands the complete, bounded set of root-file edits to the `agents-md-maintenance` skill once after the domain map, navigation summaries, backlog, and operational notes are ready. Do not create one handoff per navigation entry. The coordinator integrates and verifies the result. If `agents-md-maintenance` is unavailable, report the missing capability and leave the root file unmodified.
 
 **Generate docs** (per domain in this deep-write main batch):
 
 - `docs/<DOMAIN>_KNOWLEDGE_BASE.md` (DOMAIN must be a business concept name—not a module name)
 - `docs/<TOPIC>_GUIDE.md` (only extract shared horizontal mechanisms; threshold in `knowledge-network-design.md`)
-- Project-root `AGENTS.md`
+- Project-root `AGENTS.md` (route deliberate edits through the dedicated `agents-md-maintenance` skill; use it once for the bounded root-file update, then let the coordinator integrate and verify the result. If unavailable, report the missing capability rather than editing the file directly.)
 - Project-root `CLAUDE.md` (single line `@AGENTS.md` only)
 
 **Deep-write standards and quality gates:** `references/document-templates.md` “Deep-write standards”; after each KB, immediately self-check against quality gates and backfill if unmet.
 
-**Write root `AGENTS.md` nav** (immediately after each doc):
+**Prepare root `AGENTS.md` navigation summaries** (collect them while generating docs; apply them in the single `agents-md-maintenance` handoff after the complete root update is ready):
 
 ```bash
-python3 <DOC_INIT_DIR>/scripts/upsert_agents_nav.py --root . --path docs/<DOMAIN>_KNOWLEDGE_BASE.md --when-to-read "<task trigger phrase>"
+python3 <DOC_INIT_DIR>/scripts/upsert_agents_nav.py --root . --path docs/<DOMAIN>_KNOWLEDGE_BASE.md --summary "<concise summary of the document content>"
 ```
 
-`--when-to-read` supplies the complete route: applicable tasks and business scope; for important normative docs include **must read + trigger + consequence** in each entry. The helper formats supplied text; it does not infer importance or add missing requirements.
+The `AGENTS.md` document navigation has one shared instruction to read documents whose described content is relevant to the current task. The helper preserves an existing equivalent instruction and adds the default only when none is present. Entries are concise descriptions of actual document content, not trigger lists or duplicated policy. `--when-to-read` remains a backward-compatible alias for `--summary`; both have the same content-summary meaning. The designated `agents-md-maintenance` writer runs the helper; it does not infer or rewrite document facts. It recognizes `## 文档导航`, `## 规则索引`, `## Document index`, and `## Documentation index` without creating a competing section.
 
-**Register backlog** (after the main batch, register all pending domains—never silently drop):
+**Prepare backlog registration** (after the main batch, include all pending domains in the single `agents-md-maintenance` handoff—never silently drop):
 
 ```bash
 python3 <DOC_INIT_DIR>/scripts/upsert_agents_nav.py \
   --root . --backlog \
   --name "<domain> KB" \
   --anchor "<entry dir>" \
-  --when-to-read "<trigger scenario>"
+  --summary "<content covered by the planned document>"
 ```
 
 **Persist the domain map** (**mandatory**, even when this session fully covered everything):
 
-Write the complete domain map into root `AGENTS.md` `## 领域地图（doc-init）`. This section **only serves the `doc_coverage.py` coverage gate**—do not duplicate paths and trigger phrases already in doc nav.
+Write the complete domain map into root `AGENTS.md` `## 领域地图（doc-init）`. This section **only serves the `doc_coverage.py` coverage gate**—do not duplicate paths and content summaries already in doc navigation.
 
 Format: baseline stamp + two-column table (domain | entry anchors); **forbidden** process-metadata columns like “Status” or “Notes”—“Generated / Deep-write this session / To be filled” has no value for later work models; doc paths are already registered in doc nav.
 

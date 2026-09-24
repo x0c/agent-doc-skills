@@ -124,14 +124,14 @@ Replace `<placeholder>` with this domain’s real entries. Low-confidence valida
 
 Do not fabricate historical incidents or real pitfalls. If the user volunteers past issues in Q&A, you may write “common easy-to-miss conditions” or “pending doc-update persistence”; without evidence, mark low confidence or to be filled.
 
-Immediately after generating a doc, add its complete navigation route to root `AGENTS.md` (or the appropriate registered secondary index). Important normative docs require an independently actionable **must read + task/domain trigger + consequence**. Keep equivalent strength in nearby pointers. Ordinary references use descriptive task routes without claiming mandatory status.
+Immediately after generating a doc, add a precise, concise content summary to root `AGENTS.md` (or the appropriate registered secondary index). Root `AGENTS.md` document navigation has one shared instruction to read documents whose described content is relevant to the current task. Do not turn individual entries into trigger lists or duplicate policy.
 
-Example: `docs/PAYMENTS_KNOWLEDGE_BASE.md`: **must read** before changing, reviewing or troubleshooting callbacks/refunds; otherwise duplicate callbacks can credit a payment twice.
+Example: `docs/PAYMENTS_KNOWLEDGE_BASE.md`: payment lifecycle, callback handling, refunds, idempotency, and failure recovery.
 
-Avoid content-only blurbs and keyword-only entries that depend on a shared preamble.
+Use content summaries; the single shared relevance instruction handles task routing.
 
 ```bash
-python3 <DOC_INIT_DIR>/scripts/upsert_agents_nav.py --root . --path docs/<DOMAIN>_KNOWLEDGE_BASE.md --when-to-read "<when to read>"
+python3 <DOC_INIT_DIR>/scripts/upsert_agents_nav.py --root . --path docs/<DOMAIN>_KNOWLEDGE_BASE.md --summary "<concise summary of the document content>"
 ```
 
 ## Guide template
@@ -149,7 +149,7 @@ Granularity judgment before generating:
 # [Mechanism] Guide
 
 ## Document positioning
-[Mechanism boundaries this Guide covers, applicable modules/domains, main entries, and what it does not cover. Do not repeat root AGENTS.md “when to read” routing sentences.]
+[Mechanism boundaries this Guide covers, applicable modules/domains, main entries, and what it does not cover. Do not repeat the shared index relevance instruction.]
 
 ## Mechanism positioning
 [What problem it solves; which business domains depend on it]
@@ -171,7 +171,7 @@ Granularity judgment before generating:
 - [Content code cannot reconstruct; needs user or later doc-update]
 ```
 
-After generating a Guide, sync the “Related docs” sections of related domain KBs, and add task-triggered nav in root `AGENTS.md`.
+After generating a Guide, sync the “Related docs” sections of related domain KBs, and add a concise content summary to root `AGENTS.md`.
 
 Guide root nav also uses `scripts/upsert_agents_nav.py`.
 
@@ -184,7 +184,7 @@ Root `AGENTS.md` includes:
 - Project intro: 2–3 sentences—what it is, whom it serves, core tech traits.
 - Coding conventions: framework choices, must/forbidden coding patterns.
 - Validation: how to start, how to validate typical changes.
-- Doc navigation: route to domain KBs and Guides by task trigger. The heading is the literal key `## 文档导航` (documentation navigation)—`upsert_agents_nav.py` creates and fills it, and `doc_nav_lint.py` reports an error when it is missing, so do not hand-translate the heading.
+- Doc navigation: summarize domain KBs and Guides accurately and concisely. Project files keep the literal key `## 文档导航`; the helper also recognizes `## 规则索引`, `## Document index`, and `## Documentation index` in existing instruction files, so it reuses their heading rather than creating a competing section.
 
 ### Ops cheat sheet (runnable projects only)
 
@@ -212,7 +212,7 @@ Nav rules:
 
 - Domain KBs first: cluster by business module / domain / line; high-frequency domains earlier.
 - Shared Guides next: flow orchestration, sharding routing, permissions, plugin components, ops validation, and other horizontal mechanisms after domain KBs.
-- Each entry includes its task/domain trigger; important normative docs also carry their own must-read strength and consequence.
+- Each entry summarizes the actual document content; one shared instruction tells Agents to read documents relevant to the current task.
 - Do not flatten by tech resource: do not make tables/classes/APIs the main root-nav structure; those indexes live in the corresponding domain KB.
 
 After generate/update, run:
