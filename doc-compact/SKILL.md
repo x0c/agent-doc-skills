@@ -5,7 +5,7 @@ description: Audit and compress bloated project documentation while preserving b
 
 # doc-compact
 
-Apply the installed `Project Documentation Management` lifecycle contract. Environment instructions own language, permissions, model selection and shared-document locations. Route deliberate `AGENTS.md` edits, including navigation and compression, through the dedicated `agents-md-maintenance` skill as one bounded change set; the coordinator integrates and verifies the result. If unavailable, report the missing capability.
+Apply the installed `Project Documentation Management` lifecycle contract. Environment instructions own language, permissions, model selection and shared-document locations. Route deliberate `AGENTS.md` edits, including navigation and compression, through the dedicated `agents-md-edit` skill as one bounded change set; the coordinator integrates and verifies the result. If unavailable, report the missing capability.
 
 Before running, discover the files that are actually in effect—do not hardcode paths.
 `<DOC_INIT_DIR>` defaults to a sibling of this skill: `<directory of this SKILL.md>/../doc-init`

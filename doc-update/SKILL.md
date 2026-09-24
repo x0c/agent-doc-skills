@@ -5,7 +5,7 @@ description: Persist reusable findings and product decisions, repair stale docum
 
 # Documentation updates
 
-Apply the documentation lifecycle contract in the installed `Project Documentation Management` block. This skill supplies the bounded update procedure; environment instructions own language, permissions and shared-document locations. When `AGENTS.md` needs a deliberate edit, route one bounded change set through the dedicated `agents-md-maintenance` skill; the coordinator integrates and verifies it. If unavailable, report the missing capability.
+Apply the documentation lifecycle contract in the installed `Project Documentation Management` block. This skill supplies the bounded update procedure; environment instructions own language, permissions and shared-document locations. When `AGENTS.md` needs a deliberate edit, route one bounded change set through the dedicated `agents-md-edit` skill; the coordinator integrates and verifies it. If unavailable, report the missing capability.
 
 ## 1. Gather and filter
 

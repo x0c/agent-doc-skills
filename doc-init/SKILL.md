@@ -195,26 +195,26 @@ Read precise Q&A rules in `references/human-intake.md`; read `references/documen
    - Canonical-term consistency: same concept uses the same canonical term across KBs
    - Ops cheat-sheet merge: multi-host module projects enumerate ports one by one
 
-**Root file boundary:** workers must not modify root `AGENTS.md`; the coordinator hands the complete, bounded set of root-file edits to the `agents-md-maintenance` skill once after the domain map, navigation summaries, backlog, and operational notes are ready. Do not create one handoff per navigation entry. The coordinator integrates and verifies the result. If `agents-md-maintenance` is unavailable, report the missing capability and leave the root file unmodified.
+**Root file boundary:** workers must not modify root `AGENTS.md`; the coordinator hands the complete, bounded set of root-file edits to the `agents-md-edit` skill once after the domain map, navigation summaries, backlog, and operational notes are ready. Do not create one handoff per navigation entry. The coordinator integrates and verifies the result. If `agents-md-edit` is unavailable, report the missing capability and leave the root file unmodified.
 
 **Generate docs** (per domain in this deep-write main batch):
 
 - `docs/<DOMAIN>_KNOWLEDGE_BASE.md` (DOMAIN must be a business concept name—not a module name)
 - `docs/<TOPIC>_GUIDE.md` (only extract shared horizontal mechanisms; threshold in `knowledge-network-design.md`)
-- Project-root `AGENTS.md` (route deliberate edits through the dedicated `agents-md-maintenance` skill; use it once for the bounded root-file update, then let the coordinator integrate and verify the result. If unavailable, report the missing capability rather than editing the file directly.)
+- Project-root `AGENTS.md` (route deliberate edits through the dedicated `agents-md-edit` skill; use it once for the bounded root-file update, then let the coordinator integrate and verify the result. If unavailable, report the missing capability rather than editing the file directly.)
 - Project-root `CLAUDE.md` (single line `@AGENTS.md` only)
 
 **Deep-write standards and quality gates:** `references/document-templates.md` “Deep-write standards”; after each KB, immediately self-check against quality gates and backfill if unmet.
 
-**Prepare root `AGENTS.md` navigation summaries** (collect them while generating docs; apply them in the single `agents-md-maintenance` handoff after the complete root update is ready):
+**Prepare root `AGENTS.md` navigation summaries** (collect them while generating docs; apply them in the single `agents-md-edit` handoff after the complete root update is ready):
 
 ```bash
 python3 <DOC_INIT_DIR>/scripts/upsert_agents_nav.py --root . --path docs/<DOMAIN>_KNOWLEDGE_BASE.md --summary "<concise summary of the document content>"
 ```
 
-The `AGENTS.md` document navigation has one shared instruction to read documents whose described content is relevant to the current task. The helper preserves an existing equivalent instruction and adds the default only when none is present. Entries are concise descriptions of actual document content, not trigger lists or duplicated policy. `--when-to-read` remains a backward-compatible alias for `--summary`; both have the same content-summary meaning. The designated `agents-md-maintenance` writer runs the helper; it does not infer or rewrite document facts. It recognizes `## 文档导航`, `## 规则索引`, `## Document index`, and `## Documentation index` without creating a competing section.
+The `AGENTS.md` document navigation has one shared instruction to read documents whose described content is relevant to the current task. The helper preserves an existing equivalent instruction and adds the default only when none is present. Entries are concise descriptions of actual document content, not trigger lists or duplicated policy. `--when-to-read` remains a backward-compatible alias for `--summary`; both have the same content-summary meaning. The designated `agents-md-edit` writer runs the helper; it does not infer or rewrite document facts. It recognizes `## 文档导航`, `## 规则索引`, `## Document index`, and `## Documentation index` without creating a competing section.
 
-**Prepare backlog registration** (after the main batch, include all pending domains in the single `agents-md-maintenance` handoff—never silently drop):
+**Prepare backlog registration** (after the main batch, include all pending domains in the single `agents-md-edit` handoff—never silently drop):
 
 ```bash
 python3 <DOC_INIT_DIR>/scripts/upsert_agents_nav.py \
