@@ -6,6 +6,7 @@ This document defines Phase 2 project scanning and the knowledge-boundary report
 
 - Scan goals
 - Project structure scan
+- Navigation validation limits
 - Language stacks and hidden semantics
 - Business-domain identification
 - Domain language unification
@@ -29,6 +30,12 @@ While scanning, prioritize: “Which business modules / domains / lines does thi
 - Existing `*.md` and `README.md`—avoid rebuilding docs that already exist.
 - Requirements, API docs, test docs, historical wiki, log/runtime entry points the user provided in Intake.
 - If inventory outputs `evidence_sources`, treat it first as a light candidate evidence map—do not deep-dig every candidate immediately.
+
+## Navigation validation limits
+
+`scripts/doc_nav_lint.py` currently extracts a `/docs/<file>.md` suffix from home-relative Markdown links such as `~/workspace/product/docs/<file>.md`, then tests that suffix as an absolute path. This produces `dead-doc-link` errors even when the full target exists. Confirm the full Markdown destination with `Path(destination).expanduser().exists()` and use the `agents-md-edit` structural auditor to cross-check navigation; report both the raw lint result and the independently verified targets. Do not rewrite valid links against the workspace's inheritance convention merely to silence this parser error. Real missing targets still require repair.
+
+Environment improvement pending: parse complete Markdown destinations, expand home-relative paths before existence checks, and normalize in-project references for orphan detection. Add fixtures for valid and missing home-relative links, relative links, and external links before deploying a parser change. This finding authorizes documenting the workaround, not unrelated tooling implementation.
 
 ## Coverage review (continuation / suspected complete)
 

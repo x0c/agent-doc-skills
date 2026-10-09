@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).with_name("upsert_agents_nav.py")
@@ -23,6 +24,27 @@ LINT_SPEC.loader.exec_module(LINT)
 
 
 class UpsertAgentsNavTests(unittest.TestCase):
+    def test_lint_resolves_complete_home_relative_links_and_encoded_spaces(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "project"
+            root.mkdir()
+            shared = Path(directory) / "shared" / "docs"
+            shared.mkdir(parents=True)
+            (shared / "A guide.md").write_text("# Guide\n", encoding="utf-8")
+            (root / "AGENTS.md").write_text(
+                "## Document index\nRead relevant documents.\n"
+                "[Shared](~/shared/docs/A%20guide.md#scope)\n"
+                "[Missing](~/shared/docs/Missing.md)\n"
+                "[Official](https://example.com/docs/A.md)\n",
+                encoding="utf-8",
+            )
+            with patch.dict("os.environ", {"HOME": directory}):
+                report = LINT.lint(root)
+            dead = [item for item in report["issues"] if item["code"] == "dead-doc-link"]
+            self.assertEqual(len(dead), 1)
+            self.assertIn("~/shared/docs/Missing.md", dead[0]["message"])
+            self.assertEqual(report["summary"]["referenced_docs_count"], 2)
+
     def test_existing_table_row_and_current_task_rule_are_preserved(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

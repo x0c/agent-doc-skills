@@ -16,9 +16,13 @@ import json
 import re
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote
 
 
-DOC_LINK_RE = re.compile(r"(?:\[[^\]]+\]\()?`?(\.?/?(?:docs|specs)/[^\s`)]+?\.md)`?\)?")
+DOC_LINK_RE = re.compile(
+    r"\[[^\]]+\]\((<?[^)\n]+?\.md(?:#[^)\n]*)?>?)\)"
+    r"|(?<![\w~/])`?((?:\./)?(?:docs|specs)/[^\s`)]+?\.md)`?"
+)
 GLOBAL_REF_RE = re.compile(r"(@?\s*(?:~|\$HOME|/Users/[^/\s`，。；；、)]+)/(?:\.claude|\.codex|\.config/opencode|\.agents|\.config/agentsync)/[^\s`，。；；、)]+)", re.I)
 NEGATIVE_EXAMPLE_RE = re.compile(r"(不要|不应|禁止|例如|示例|常见路径|路径形态|不是)")
 SELF_NAV_RE = re.compile(r"(何时(?:该|需要)?阅读|何时(?:该|需要)?读|when to read|read this document before|before reading this document)", re.I)
@@ -64,7 +68,7 @@ def line_number(text: str, offset: int) -> int:
 
 
 def normalize_doc_path(value: str) -> str:
-    value = value.strip().replace("\\", "/")
+    value = unquote(value.strip().strip("<>").split("#", 1)[0]).replace("\\", "/")
     if value.startswith("./"):
         value = value[2:]
     return value
@@ -168,9 +172,11 @@ def lint(root: Path) -> dict[str, Any]:
     referenced_docs = set()
     if agents_text:
         for match in DOC_LINK_RE.finditer(agents_text):
-            doc_path = normalize_doc_path(match.group(1))
+            doc_path = normalize_doc_path(match.group(1) or match.group(2))
+            if "://" in doc_path:
+                continue
             referenced_docs.add(doc_path)
-            if not (root / doc_path).exists():
+            if not (root / Path(doc_path).expanduser()).exists():
                 add_issue(
                     issues,
                     "error",

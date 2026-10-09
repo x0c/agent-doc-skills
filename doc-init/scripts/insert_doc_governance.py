@@ -23,7 +23,7 @@ the next doc-init run will detect and upgrade already-deployed older versions.
 import sys
 import re
 
-CURRENT_VERSION = 20
+CURRENT_VERSION = 21
 
 # Heading used in the injectable STANDARD (English for open-source inject).
 SECTION_TITLE = "Project Documentation Management"
@@ -33,55 +33,43 @@ LEGACY_SECTION_TITLE = "项目文档管理"
 STANDARD = f"""## {SECTION_TITLE}
 <!-- doc-governance-version: {CURRENT_VERSION} -->
 
-### 1. Ownership and entry points
+### Ownership and entry points
 
-* This block owns the documentation lifecycle: capture, selection, organization, correction, cross-project promotion and verification. Its maintenance source is doc-init's injectable preset; the installed block is a generated copy. Skill bodies supply execution procedures, not competing policies.
-* Language, memory facilities, permissions, Git/release behavior, model selection and actual shared-document locations belong to the user's environment instructions. Documentation improvement does not authorize unrelated implementation or rewriting other global policies.
-* Root `AGENTS.md` is the project's only top-level documentation entry. Long-lived docs must be reachable in one or two hops. Project-root `CLAUDE.md` defaults to the single line `@AGENTS.md`.
-* On project creation or takeover, discover any declared cross-project standards location and link matching language/stack standards near the top of root `AGENTS.md`. Do not invent a location if none is declared.
+This preset owns documentation capture, selection, placement, navigation, correction, promotion and verification. Maintain its source in doc-init; installed blocks are generated copies. Skills supply procedures. User/environment instructions own language, memory, permissions, Git/release, models and actual paths; documentation work does not authorize unrelated implementation or policy changes.
 
-### 2. Capture and continuous improvement
+Root `AGENTS.md` is the only top-level documentation entry; project-root `CLAUDE.md` defaults to `@AGENTS.md`. Long-lived docs are reachable in one or two hops. On creation/takeover, link declared matching language/stack standards near the root's top; never invent a shared location.
 
-* Before implementing durable product decisions, requirements or corrections, record the current requirement in the appropriate document and make its entry reachable. Exclude temporary task scope, illustrative examples and unadopted suggestions. For a wording veto, capture the usefulness test, not a permanent ban on the rejected words.
-* Persist reusable investigation findings when established, including Q&A with no code changes. Use `doc-update` when available for incremental updates; at closure, check for omissions. No new durable knowledge means no forced update.
-* Record relevant symptoms, applicability, causes, remedies and verification evidence. Distinguish verified facts, unverified hypotheses and decisions awaiting confirmation. Existing mechanism coverage does not imply that a newly observed symptom or failed remedy is already documented.
-* Search existing authoritative docs before adding material. If a needed doc was missing, hard to find or misleading, repair its coverage, routing or wording in the same bounded update. Preserve valid task coverage while merging repetition and removing obsolete triggers.
-* When correct documentation still leaves a recurring operational obstacle, record an actionable environment-improvement item alongside the workaround. Tracking the improvement does not authorize implementing it outside the task.
+### Capture and selection
 
-### 3. Placement and knowledge selection
+- Record-first is a gate: draft adopted durable requirements, corrections and user-visible bug-fix behavior in the owning document and make it reachable before touching code, config, or other docs for that decision. When placement is uncertain, draft at the nearest reachable doc and relocate in the same turn. Temporary scope, examples and unadopted suggestions are excluded; a wording veto records the usefulness test rather than a permanent word ban.
+- Persist reusable findings when established, including Q&A without code changes, through `doc-update` when available; check omissions at closure. Search existing authorities first. No new durable knowledge means no forced update.
+- Preserve non-obvious business rules, hidden constraints, validated workflows, causes/remedies and material risks. Record relevant symptoms, applicability and verification; distinguish facts, hypotheses and pending decisions. Existing mechanism coverage does not establish coverage of a new symptom or failed remedy. Do not duplicate code structure, Git history, policy or session narrative.
+- Repair missing/misleading coverage or routing in the same bounded update. Preserve valid task coverage while consolidating repetition and obsolete triggers. A recurring obstacle despite correct docs needs an actionable environment-improvement item alongside its workaround; recording it does not authorize implementation.
 
-| Information | Authoritative destination |
+### Placement
+
+| Information | Authority |
 |---|---|
 | Project-wide operating rules | Project-root `AGENTS.md` |
-| Product behavior, domain knowledge, architecture | Matching document under project `docs/` |
-| Reusable task procedure, checklist or executable helper | Matching skill |
-| Cross-project platform facts, constraints and troubleshooting knowledge | Declared shared guide or standards location |
-| Recurring environment obstacle requiring implementation | Existing project backlog or an indexed design/troubleshooting document |
+| Product behavior, domain knowledge and architecture | Matching project `docs/` document |
+| Reusable procedure, checklist or executable helper | Matching skill |
+| Cross-project platform facts, constraints and troubleshooting | Declared shared guide/standards |
+| Recurring implementation obstacle | Existing backlog or indexed design/troubleshooting document |
 
-* During updates and full document cleanup, promote reusable cross-project knowledge to the declared shared authority; keep product-specific details and pointers locally. If no destination is declared, report the missing binding instead of inventing a machine path.
-* Keep knowledge that prevents rediscovery or mistakes: business rules, hidden constraints, validated workflows, failure causes, remedies and unresolved material risks. Do not duplicate code structure, Git history, existing rules or session-only narrative.
-* Use domain knowledge bases, guides, design docs or troubleshooting records according to the project's registered types. Register a new long-lived type's purpose and placement at the root; do not create competing bare `INDEX.md` / `OVERVIEW.md` entry points.
+Promote reusable cross-project knowledge during updates/cleanup, retaining local product details and pointers. Report missing shared bindings instead of inventing paths. Use registered domain KB, guide, design and troubleshooting types; register a new type's purpose/placement at root and avoid competing bare `INDEX.md`/`OVERVIEW.md` entry points.
 
-### 4. Navigation and indexes
+### Navigation and indexes
 
-* Each long-lived doc has one navigation entry at the root or its registered secondary index. Describe the document's actual content precisely and concisely; do not turn entries into trigger lists or duplicate the document body.
-* Add one shared instruction to the `AGENTS.md` document navigation: read documents whose described content is relevant to the current task. Keep individual entries descriptive rather than repeating this routing rule.
-* When a deliberate `AGENTS.md` edit is needed, route the edit through the dedicated `agents-md-edit` skill; documentation skills retain lifecycle decisions and verify the result. If that capability is unavailable, report the limitation rather than editing around it.
-* Put a pointer beside a rule it supports. This may coexist with the doc's single navigation entry.
-* Default to direct root links. Add a named `<DOMAIN>_INDEX.md` only when a group makes navigation hard to scan; counts and line limits are audit signals, not automatic restructuring commands. Root then links the index and the index links the documents. No deeper index chain.
-* Register new docs immediately and check for unregistered files. Remove entries when deleting docs; update all affected links after moves or renames. Expanded content requires updating its content summary too.
+- Describe the document's actual content precisely and concisely in its root or registered secondary-index entry. Add one shared instruction to the `AGENTS.md` document navigation to read relevant documents before governed decisions. Entries are content summaries, not trigger lists or duplicate rules; ordinary implementation must find requirements even when the request omits their keywords.
+- Use the dedicated `agents-md-edit` skill for deliberate root edits; report its absence rather than bypass it. Documentation skills retain lifecycle ownership and verify the integrated result.
+- Prefer direct root links. Use a named `<DOMAIN>_INDEX.md` only when a group is hard to scan; counts/line limits are signals, not commands. Root → index → document is the deepest index chain. Reading relevance has no arbitrary document quota.
+- Register documents immediately, check orphans and update summaries/links after expansion, moves, renames or deletion. A pointer beside a supported rule may coexist with the canonical navigation entry; multiple useful routes do not duplicate the authority's body.
 
-### 5. One authoritative source and corrections
+### Corrections and verification
 
-* Maintain each fact, rule or mechanism in one authoritative source; use resolvable pointers where other documents need it. Do not copy changing facts across documents.
-* When confirmed knowledge or terminology changes, correct affected old conclusions and references together. Verify against product decisions, requirements and implementation evidence as appropriate; user-confirmed new requirements can supersede outdated implementation.
-* Mark unresolved contradictions explicitly with the decision needed. Do not present incompatible claims as simultaneously confirmed. Keep corrections bounded to the affected concepts; a small update is not a full-document census.
+Maintain one authoritative home per fact/rule/mechanism, with resolvable pointers elsewhere. Correct superseded conclusions and affected references together, using adopted requirements and evidence; a user-confirmed requirement may supersede implementation. Mark unresolved contradictions and the needed decision. Keep updates bounded; a small change is not a full census.
 
-### 6. Verification and closure
-
-* Re-read changed content, verify entry reachability and links, and check for conflicting statements or missing content summaries. Report unresolved verification limits accurately.
-* Check that promised documentation and reference updates are complete. Report changed document paths and their purpose; if nothing changed, state that no documentation update was needed.
-* Compression must preserve behavior, boundaries, exceptions, evidence and machine-parsed markers. A review stamp is a coverage receipt, not proof of semantic correctness.
+Re-read changes and navigation; verify reachability, links, content summaries, contradictions and representative behavior. Compression preserves scope, timing, exceptions, evidence and machine-parsed markers. A structural pass or review stamp is not semantic proof. Report changed document paths/purpose and remaining limits; when no update was needed, say so.
 """
 
 VERSION_RE = re.compile(r"<!--\s*doc-governance-version:\s*(\d+)\s*-->")

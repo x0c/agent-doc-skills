@@ -1,6 +1,6 @@
 # Sub-agent Deep-Write Prompt Template
 
-This document defines the prompt structure and input contract when the main Agent dispatches sub-agents for deep-write. Deep-write quality is capped by prompt quality from the main Agent—not by sub-agent capability. More structured information and concrete signals mean less re-exploration and deeper output.
+Use this work-brief template only for explicitly authorized external workers. It does not authorize delegation or native subagents; runtime, model and UI ownership follow the current environment. Structured evidence and concrete boundaries reduce repeated exploration and improve deep-write quality.
 
 ---
 
@@ -151,7 +151,7 @@ For each deep-write domain D:
   4. Take Q&A pairs related to D from Step 9
   5. Extract interfaces that interact with D from other domains’ boundary reports
   6. Assemble the full prompt from the template above
-  7. Dispatch sub-agent(prompt, model="sonnet")
+  7. If explicitly authorized, dispatch the external worker using the current permitted model policy; otherwise execute directly.
 ```
 
 ---
