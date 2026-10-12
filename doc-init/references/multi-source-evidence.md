@@ -85,3 +85,18 @@ Old projects have lots of evidence and lots of noise. By default ignore:
 - Process words in Git commits: `feat`, `fix`, `refactor`, `merge`, `into`, `origin`, `dev_*`, `feature_*`—never treat as business nouns.
 
 If a path ignored by default is truly a business material source in this project, the Agent may read it manually but must explain in the report why the default filter was overridden.
+
+## External source adoption notes (optional)
+
+The rules above govern internal evidence for documentation. When the task itself is
+adopting a third-party data source or SDK, treat that evaluation as its own small
+research pass, kept separate from doc-generation evidence:
+
+- Prefer the authoritative primary material for the particular claim: official docs,
+  repo, releases, registry, or issue evidence as applicable — these are examples, not
+  a mandatory category ranking or quota. Do not rely on blogs or SEO articles.
+- Record the outcome as a short note that keeps four things distinct: facts verified
+  against primary sources, current unknowns, engineering inferences, and production
+  risks (runtime, auth, deploy, and operations constraints feed the risk section).
+- Tag the verdict with a dated local classification. Each product owns its own tag
+  set; per-source verdicts stay in the product docs.

@@ -6,12 +6,15 @@ This document defines templates and root-entry rules used when doc-init generate
 
 - Domain knowledge-base template
 - Guide template
+- [Feature intake brief (optional)](#feature-intake-brief-optional)
 - Root AGENTS.md
 - Project-root CLAUDE.md
 
 ## Domain knowledge-base template
 
 Generate and write the file immediately after that domain’s Q&A—do not wait for other domains.
+
+Use the applicable sections below. Where a domain has no persistence, state machine, or background jobs, say so briefly; do not invent content to fill the template. Keep actual coverage gaps distinct from non-applicable sections.
 
 Before generating, finish domain-language normalization: pick one canonical term for core concepts and use it stably in body text; keep code class/enum/table/field/API parameter names verbatim in entry indexes or first-appearance parentheses. Do not default a “Glossary” section. Only homonyms, synonyms, or parameter mix-ups that would make AI write wrong code go into §6 `【Disambiguation】`.
 
@@ -39,7 +42,7 @@ Before generating, finish domain-language normalization: pick one canonical term
 
 ## §1.5 Architecture overview
 
-[1–2 mermaid diagrams for a quick layered call model. Mandatory for core domains; optional for standard domains.]
+[Use a diagram when it clarifies actual relationships, transitions, or event ordering. A simple domain may need only a short flow description.]
 
 **Diagram selection guide** (pick the type that most reduces cognitive cost for the domain):
 
@@ -96,7 +99,7 @@ Paths must start from the project root (e.g. `src/main/java/com/example/payment/
 - After changing [scenario]: run/call [command or API], check [logs/tables/flow records/cache]
 - Note: [effect conditions common in this domain but not directly reminded by code]
 
-**Validation paths must not be empty.** If real commands cannot come from runtime validation, at least generate template validation paths from code scan:
+**Validation paths evidence the domain’s real surface.** If real commands cannot come from runtime validation, generate template validation paths from code scan using the domain’s real entries:
 
 - DB validation (persistence scenarios): `SELECT <key_fields> FROM <main_table> WHERE <condition> -- confirm <field> changed to expected value`
 - Log validation (logging scenarios): `grep '<keyword|exception class>' <log_path> | tail -5`
@@ -105,7 +108,7 @@ Paths must start from the project root (e.g. `src/main/java/com/example/payment/
 - Compile validation (compiled languages): `<build_command> && echo "build ok"`
 - Unit-test validation (when tests exist): `<test_command> -t <TestClass>#<testMethod>`
 
-Replace `<placeholder>` with this domain’s real entries. Low-confidence validation paths note “pending runtime validation”.
+Replace `<placeholder>` with this domain’s real entries. Low-confidence validation paths note “pending runtime validation”. Where the domain has no validatable runtime surface, say what was checked and record the gap in §9—do not invent executable commands.
 
 ## §8 Related docs
 - [GUIDE doc]: covers [shared/specialized mechanism] details; read together when that mechanism is involved
@@ -237,24 +240,37 @@ Write or normalize to a single line:
 
 Check for `DRAFT_*.md` and `*-draft.md`; if missing, suggest adding them.
 
+## Feature intake brief (optional)
+
+When a data-backed or analytics feature request needs scoping before a formal spec,
+an optional short brief may precede it. This is a scoping aid, not a required gate,
+and its shape stays product-owned:
+
+- Problem statement, target users, and decision/output form first — if the output
+  cannot be named clearly, the request is not ready for a formal spec.
+- Quantified freshness expectation with staleness tolerance: which dependencies may
+  go stale and the upper bound (e.g. same-day vs next-day usefulness under T+0/T+1
+  disclosure lag).
+- Candidate capabilities mapped capability-before-vendor, known limits, reuse
+  opportunities, directional success signals, open questions, and an explicit
+  outcome (proceed to spec / research first / split / defer / reject).
+- Normalize vague local terms as a step using the product's own vocabulary.
+
 ---
 
 ## Deep-write standards
 
-### Deep-write rounds (required for every domain KB)
+### Investigation depth
 
-Each domain KB is not “scan once, write once”—complete at least 2 rounds (core domains mandatory 3):
+Use the applicable checks below to establish useful coverage. Their order and repetition depend on what remains unknown; they are not compulsory rounds.
 
-**Round 1 — Vertical trace:** From “user trigger entry” (Controller/API/CLI) along the call chain to “data persistence” (Repository/Mapper/table); record key class names, method signatures, and status-transition logic at each layer. Do not stop across modules. **Also record each layer’s full physical path** (from project root, no ellipsis); after the round, summarize into §2.5.
+**Vertical trace:** Follow the domain's real trigger (API, CLI command, public library function, event, or job) through its logic and effects, including persistence where present. Record relevant symbols, branches, and full repository-relative paths in §2/§2.5/§3. Follow across module boundaries when the flow crosses them; do not invent absent layers.
 
-**Round 2 — Horizontal scan:** In already-traced entries, find concurrency control (@Version/locks/CAS), idempotency (unique keys/dedupe), event publish (Event/MQ), cron triggers, exception fallback strategies—write each into §6. If §6 has fewer than 3 items, keep scanning.
+**Cross-cutting checks:** Inspect applicable concurrency, idempotency, event ordering, scheduled work, and failure/recovery behavior. Write confirmed constraints with evidence in §6; record unresolved risks in §9. Continue investigation for a concrete gap, not to reach an item count.
 
-**Round 3 (mandatory for core; optional for standard):**
-1. **Entity field semantics scan:** Open main entity classes; per field check: whether NULL has special business meaning, whether same-named fields differ across tables, whether FK targets disagree with naming hints, implicit framework fields like `version`/`biz_status`.
-2. **JSON/DSL field format extraction:** If depth_scanner `json_field_patterns` hits this domain, trace deserialize DTOs and extract format rules into §6.
-3. **Complete table/field index:** Core-domain §4 must list key fields of the main table and key related tables (PK, status, shard keys, FKs, money/balance, time fields) with types and business meaning.
+**Field and format semantics:** Where data exists, verify key-field types and meanings: identity, ownership, NULL behavior, status/version fields, relations, money, and time. Follow JSON/DSL decoding when relevant signals identify it. Core or high-risk domains need deeper evidence for their consequential branches and related data; a table row count does not establish this.
 
-**After Round 2 (mandatory for core):** From Round 1’s layered structure, draw §1.5 mermaid diagrams. Pick the best type from the diagram selection guide; use real class names—no abstract placeholders.
+**Architecture overview:** Use the diagram selection guide when a diagram improves understanding of the inspected structure; label actual components. Do not add a diagram solely to satisfy a template.
 
 **§2.5 physical-path data source:** Prefer directories from `depth_scanner.py` `framework_components[].file_path` and `entity_fields[].file_path`; dedupe and fill the §2.5 table. Sub-agents need not re-walk the tree—the scanner already did.
 
@@ -264,19 +280,19 @@ Each domain KB is not “scan once, write once”—complete at least 2 rounds (
 
 **Line-number replacement ops guide** (for doc-compact): when seeing line-number citations, Read that file at the line to confirm the current method name, then replace with `ClassName.methodName()`. Do not guess.
 
-**Line-count reference per KB:** core domains ≥ 300 lines (including tables and code blocks); standard ≥ 150. Below that watermark means thin §3 entries, insufficient §6 hidden constraints, or missing §7 validation paths—backfill against quality gates.
+**Adequacy over length:** No per-KB line minimum. A short KB is complete when its entries, constraints, and validation paths evidence the domain’s real surface; a long KB with invented entries or an unresolved high-value gap is not. Investigate or backfill only for a concrete gap or unresolved risk.
 
 ### Deep-write quality gates (self-check immediately after each KB)
 
-| section | Minimum | If unmet |
-|---------|---------|---------|
-| §2 Core flows/state machines | At least one state diagram or core-flow description | Supplement from `status_patterns`; pure CRUD domains use request-handling flow instead |
-| §3 Code entry index | ≥ 3 entries (Controller/Service/Handler/CLI command) | Supplement from `framework_components` |
-| §4 Table/field entries | Core: key fields of main + related tables (type+meaning); standard: at least main table and shard key/PK | Supplement from `entity_fields` + db_miner catalog |
-| §6 Hidden constraints | ≥ 3 items, ≥ 1 tagged **AI pitfall** | Supplement from `concurrency_patterns`/`idempotency_patterns`/`soft_delete_patterns` |
-| §7 Validation paths | Must not be empty | At least template-level paths (see validation path patterns above) |
-| §0 Contents | Mandatory for all KBs (10-row § table) | Copy from template; adjust to sections actually generated |
-| §1.5 Architecture overview | Core: ≥ 1 mermaid diagram (type by domain trait); standard: optional | Draw from Round 1 trace using the diagram selection guide |
-| §2.5 Physical path cheat sheet | Core: ≥ 4 directory rows; standard: ≥ 2 | Summarize full physical paths recorded in Round 1 vertical trace |
+| section | Adequate when | If not |
+|---------|---------------|--------|
+| §2 Core flows/state machines | Real transitions and key branches evidenced (enum values + meanings where state exists); pure CRUD/library/CLI domains describe the actual request-handling or command flow | Supplement from `status_patterns`, or record the concrete gap in §9 |
+| §3 Code entry index | Every entry resolves to a precise file path or symbol and covers the domain’s real trigger → logic surface | Supplement from `framework_components`; do not invent layers the domain lacks |
+| §4 Table/field entries | Real persistence evidenced (types + business meaning + change notes for fields the domain actually has); domains without tables say so | Supplement from `entity_fields` + db_miner catalog, or mark non-applicable with reason |
+| §6 Hidden constraints | Applicable risks checked; confirmed findings supported by source evidence and AI pitfalls tagged; no findings reported honestly | Follow relevant scanner signals; unresolved risks stay open in §9 |
+| §7 Validation paths | Real commands/queries against real entries; template-level paths allowed only when marked “pending runtime validation” | Derive from actual entries; missing runtime evidence is a §9 gap, not a filled quota |
+| §0 Contents | Accurately lists the sections present | Adjust the template to the actual document |
+| §1.5 Architecture overview | Inspected relationships are understandable; diagram used where helpful | Choose a diagram or concise flow description suited to the domain |
+| §2.5 Physical path cheat sheet | Full paths resolve to the relevant implementation | Summarize verified paths; row count follows the real surface |
 
-**Extra for core domains** (Git hotspots + user-named): §6 ≥ 5 items (≥ 2 from Round 3 field-semantics scan), §7 ≥ 2 executable commands, §4 must include a key-field semantics table.
+**Completion:** Representative ordinary and exceptional change scenarios must find the needed entries, constraints, and validation paths. Give core/high-risk domains deeper evidence for consequential identity, concurrency, persistence, and field-semantics branches. Record evidence limits honestly; unresolved high-value gaps prevent a claim of complete coverage. No minimum length or number of rounds, constraints, paths, or commands applies.

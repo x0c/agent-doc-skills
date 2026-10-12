@@ -22,7 +22,7 @@ Organize the sub-agent prompt as follows (in order; every item must exist or be 
 You are a doc-init deep-write Worker. Your task is to produce a complete domain knowledge-base document for the "{domain name}" business domain.
 
 Output file: `docs/{DOMAIN}_KNOWLEDGE_BASE.md`
-Template: follow the doc-init KB template (§1–§9); no section may be empty.
+Template: follow the doc-init KB template (§1–§9); adequacy follows document-templates.md evidence criteria. Sections with no applicable content state what was checked and why non-applicable (or record the concrete gap in §9) rather than inventing content.
 ```
 
 ### 2. Domain business scope
@@ -70,10 +70,10 @@ Status enums (→ §2):
 - {enum class path}: {summary of enum values}
 
 Concurrency control (→ §6 AI pitfalls):
-- {file:line}: {pattern description, e.g. "@Version optimistic lock"}
+- {file + symbol}: {pattern description, e.g. "@Version optimistic lock"}
 
 Idempotency (→ §6):
-- {file:line}: {idempotency key source description}
+- {file + symbol}: {idempotency key source description}
 
 Events/MQ (→ §5):
 - {publisher file} → {topic/event} → {consumer file}
@@ -118,13 +118,13 @@ Related-domain info (write into §8 related docs + §6 cross-domain constraints)
 ### 8. Quality gates
 
 ```
-Quality floor (must backfill if unmet; do not ship as “to be filled”):
+Quality gates (evidence-adequate per document-templates.md; backfill concrete gaps, never invent content):
 
-- §2 Core flows/state machines: real enum values (code + meaning) + state-transition diagram (ASCII or list)
-- §3 Code entry index: precise to filenames (not package names only); at least Controller + core Service + Repository
-- §4 Table/field entries: main table must list fields one by one (type + business meaning + change notes)
-- §6 Hidden constraints: at least 5 items, each with code evidence (filename:line or snippet); AI pitfalls must be tagged
-- §7 Validation paths: at least 3 executable validation commands (SQL/curl/grep) with real table names / API paths / field names
+- §2 Core flows/state machines: real enum values (code + meaning) evidenced; where no state machine exists, describe the actual request-handling or command flow
+- §3 Code entry index: precise to file path or symbol (not package names only); cover the domain's real trigger → logic surface—do not invent controllers, repositories, tables, or state machines for library/CLI domains where absent
+- §4 Table/field entries: real persistence evidenced (type + business meaning + change notes for fields the domain actually has); domains without tables say what was checked and why non-applicable
+- §6 Hidden constraints: each confirmed finding with code evidence (file + symbol or inspected snippet); AI pitfalls must be tagged
+- §7 Validation paths: real commands/queries against real entries; unavailable runtime evidence is honestly marked "pending" with a §9 gap, not filled with invented paths
 ```
 
 ### 9. Constraints and forbidden behavior
@@ -133,8 +133,8 @@ Quality floor (must backfill if unmet; do not ship as “to be filled”):
 Hard constraints:
 - Create/modify only `docs/{DOMAIN}_KNOWLEDGE_BASE.md`
 - Do not modify AGENTS.md, other domains’ KBs, or shared Guides
-- Code paths must be precise to filenames—not package or directory only
-- Hidden constraints must cite line numbers or snippets—not “inferred”
+- Code paths must be precise to file path or symbol—not package or directory only
+- Hidden constraints must cite file + symbol or an inspected snippet—not “inferred”; report unavailable or non-applicable evidence honestly instead of inventing it
 - Do not fabricate pitfalls or production incidents
 - Comment/log language follows the global AGENTS “Coding” section; this template does not set a separate language default
 ```
@@ -156,15 +156,11 @@ For each deep-write domain D:
 
 ---
 
-## Deep-write rounds (inside each sub-agent)
+## Investigation and completion
 
-Each sub-agent deep-write has 3 rounds:
+Use document-templates.md “Deep-write standards” for the applicable investigation and adequacy checks; there is no fixed round count.
 
-| Round | Goal | Behavior |
-|------|------|------|
-| 1 | Skeleton | From entry inventory and signals in the prompt, read code and build §1–§5 skeleton |
-| 2 | Depth | Trace §2 transition preconditions, code evidence for §6 hidden constraints, full §5 event chains |
-| 3 | Gate self-check | Check quality gates item by item; backfill unmet ones; then output the final file |
+Read the supplied entries to confirm real flows and effects, then investigate the unresolved branches and relevant risks. Validate the resulting document against representative ordinary and exceptional changes. Return the final file once the assigned coverage is evidenced; report material gaps rather than padding the document or claiming complete coverage.
 
 ---
 
@@ -174,8 +170,9 @@ After a sub-agent finishes, the main Agent should check:
 
 | Check | If failed |
 |--------|-------------|
-| §2 has real enum values | Main Agent supplements (grep enum classes) |
-| §6 ≥ 5 items with code evidence | Send back to sub-agent or main Agent supplements |
-| §7 non-empty with real paths | Main Agent derives from Controller paths |
+| §2 evidences real transitions or the actual command/request flow | Identify the missing branch from source and request a precise correction |
+| §6 applicable risks checked and findings supported by evidence | Request the missing evidence; unresolved risks stay open in §9 |
+| §7 has real paths or honestly-marked pending validation | Verify against actual entries; identify material validation gaps |
 | Filenames / canonical terms aligned with other domains | Main Agent unifies |
 | No cross-domain content intrusion | Main Agent removes out-of-scope content |
+| No invented layers for library/CLI domains | Main Agent removes inventions; non-applicable sections state what was checked |

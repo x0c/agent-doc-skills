@@ -41,6 +41,13 @@ Presentation:
 - High-risk confusion only: write `【Disambiguation】` entries under “Core business rules and hidden constraints,” e.g. `progId` means different IDs in different flows, two status fields must not be interchanged, etc.
 - Do not default a “Glossary” section per KB; only add a short “Concept disambiguation” subsection if the user asks, or a domain has many high-frequency confusions with no other clear home.
 
+An optional alignment walk for vocabulary-heavy products: business meaning, then
+business term, then domain term, then code symbol / API field — quarantining
+upstream vocabulary (an upstream name never becomes canonical automatically), and
+recording deliberate deviations. Record each meaning/term/code relationship in the
+existing appropriate product, business, or domain authority rather than opening a
+new doc per term; vocabularies stay product-local.
+
 ## Granularity control
 
 During init, prefer coarse usable docs over splitting every class, table, API, annotation, hook, component, or flow node into its own doc.

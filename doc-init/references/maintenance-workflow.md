@@ -199,7 +199,7 @@ Read precise Q&A rules in `references/human-intake.md`; read `references/documen
 - Project-root `AGENTS.md` (route deliberate edits through the dedicated `agents-md-edit` skill; use it once for the bounded root-file update, then let the coordinator integrate and verify the result. If unavailable, report the missing capability rather than editing the file directly.)
 - Project-root `CLAUDE.md` (single line `@AGENTS.md` only)
 
-**Deep-write standards and quality gates:** `references/document-templates.md` “Deep-write standards”; after each KB, immediately self-check against quality gates and backfill if unmet.
+**Deep-write standards and quality gates:** `references/document-templates.md` “Deep-write standards”; after each KB, immediately self-check evidence adequacy against quality gates and backfill concrete gaps (or record them in §9).
 
 **Prepare root `AGENTS.md` navigation summaries** (collect them while generating docs; apply them in the single `agents-md-edit` handoff after the complete root update is ready):
 
@@ -278,7 +278,7 @@ Include lint errors/warnings in self-assessment. Fix errors before reporting com
 
 Self-assessment must also cover (item by item—not one vague paragraph):
 
-- Per-KB deep-write quality-gate pass/fail (§2/§3/§4/§6/§7 meet minima; if not, reason and remediation)
+- Per-KB deep-write quality-gate pass/fail (§2/§3/§4/§6/§7 evidence adequate for the domain’s real surface per document-templates.md; concrete gaps listed in §9 with reason and remediation)
 - depth_scanner signal utilization (how many signals out, how many written into KBs, how many discarded and why)
 - Domain-language coverage (canonical terms unified? unresolved homonyms?)
 - Git weak-signal coverage (available? hotspots and fix/revert clues only as pending candidates?)
