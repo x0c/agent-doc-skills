@@ -4,7 +4,7 @@
 
 **Stop paying your coding agent to rediscover your repository every session.**
 
-A lightweight set of Agent Skills (`doc-init`, `doc-update`, `doc-compact`) for **Claude Code**, **Codex CLI**, **Cursor**, and **OpenCode** that builds and maintains a navigable, token-efficient project knowledge base.
+A lightweight set of Agent Skills (`doc-init`, `doc-update`, `doc-compact`) for **Claude Code**, **Codex CLI**, **Cursor**, and **OpenCode**. It builds and maintains a navigable, token-efficient project knowledge base.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![skills.sh](https://skills.sh/b/x0c/agent-doc-skills)](https://skills.sh/x0c/agent-doc-skills)
@@ -71,8 +71,8 @@ Unlike generic "summarize this repo" prompts, `agent-doc-skills` pairs structure
 
 - **Evidence-based, no hallucinated specs:** Bundled helpers scan your repo inventory, Git history, code signals, and Markdown links first. If evidence is missing, the skill reports the gap instead of inventing documentation.
 - **Lossless compression (`doc-compact`):** Preserves exact scopes, exceptions, numeric thresholds, evidence, and machine-parsed markers while stripping fluff.
-- **Safe global preset injection:** `doc-init` discovers real global instruction files and preserves your existing custom instructions and neighboring managed blocks.
-- **No unauthorized background subagents:** Skills execute directly in your main session by default and respect your host's permission and model policies.
+- **Safe global preset injection:** `doc-init` discovers your actual global instruction files and preserves your existing custom instructions and neighboring managed blocks.
+- **No background subagents:** Skills execute directly in your main session and respect your host's permission and model policies.
 
 ---
 

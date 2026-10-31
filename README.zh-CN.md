@@ -4,7 +4,7 @@
 
 **别再让你的 coding agent 每个会话都从零开始重新认识你的仓库。**
 
-一组轻量的 Agent Skills（`doc-init`、`doc-update`、`doc-compact`），为 **Claude Code**、**Codex CLI**、**Cursor** 和 **OpenCode** 构建并维护可导航、省 token 的项目知识库。
+一组轻量的 Agent Skills（`doc-init`、`doc-update`、`doc-compact`），支持 **Claude Code**、**Codex CLI**、**Cursor** 和 **OpenCode**。它负责构建并维护可导航、省 token 的项目知识库。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![skills.sh](https://skills.sh/b/x0c/agent-doc-skills)](https://skills.sh/x0c/agent-doc-skills)
@@ -67,9 +67,9 @@ npx skills add x0c/agent-doc-skills -g
 
 ## 原理与安全保证
 
-和泛泛的“总结一下这个仓库”提示词不同，`agent-doc-skills` 把结构化的 agent 流程和确定性的 Python 辅助脚本配对使用：
+和泛泛的“总结一下这个仓库”提示词不同，`agent-doc-skills` 把结构化的 agent 执行流程和确定性的 Python 辅助脚本结合起来：
 
-- **基于证据，不编造规格：** 自带辅助脚本先扫描仓库盘点、Git 历史、代码信号和 Markdown 链接。缺证据就明确报告缺口，不会现编文档。
+- **基于证据，不编造规格：** 自带辅助脚本先扫描仓库结构、Git 历史、代码信号和 Markdown 链接。缺证据就明确报告缺口，不会现编文档。
 - **无损压缩（`doc-compact`）：** 保留确切的作用域、例外、数值阈值、证据和机器解析标记，只去掉废话。
 - **安全的全局预设注入：** `doc-init` 探测真实存在的全局指令文件，保留你已有的自定义指令和相邻托管块。
 - **不擅自拉起后台子代理：** skill 默认直接在你的主会话里执行，遵守宿主的权限和模型策略。
