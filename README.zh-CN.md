@@ -7,6 +7,7 @@
 一组轻量的 Agent Skills（`doc-init`、`doc-update`、`doc-compact`），为 **Claude Code**、**Codex CLI**、**Cursor** 和 **OpenCode** 构建并维护可导航、省 token 的项目知识库。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![skills.sh](https://skills.sh/b/x0c/agent-doc-skills)](https://skills.sh/x0c/agent-doc-skills)
 
 ---
 

@@ -7,6 +7,7 @@
 A lightweight set of Agent Skills (`doc-init`, `doc-update`, `doc-compact`) for **Claude Code**, **Codex CLI**, **Cursor**, and **OpenCode** that builds and maintains a navigable, token-efficient project knowledge base.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![skills.sh](https://skills.sh/b/x0c/agent-doc-skills)](https://skills.sh/x0c/agent-doc-skills)
 
 ---
 
