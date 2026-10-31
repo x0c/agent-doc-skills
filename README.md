@@ -2,48 +2,90 @@
 
 # agent-doc-skills
 
-Three Agent Skills keep project knowledge discoverable without loading every document into every conversation. Skills retain detailed procedures in linked references and use small task entrypoints.
+**Stop paying your coding agent to rediscover your repository every session.**
+
+A lightweight set of Agent Skills (`doc-init`, `doc-update`, `doc-compact`) for **Claude Code**, **Codex CLI**, **Cursor**, and **OpenCode** that builds and maintains a navigable, token-efficient project knowledge base.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+---
+
+## Why `agent-doc-skills`?
+
+When working with AI coding agents on a growing codebase, two things usually happen:
+1. **Cold-start amnesia:** Every new session starts from zero. The agent burns time and tokens running `grep` and reading dozens of files just to understand your architecture.
+2. **Instruction bloat:** You dump everything into `CLAUDE.md` or `AGENTS.md`. Soon it hits 50k+ tokens, polluting the context window and causing the model to ignore critical rules.
+
+**`agent-doc-skills` solves both with progressive disclosure:**
+Instead of loading every document into every conversation, it keeps your root `AGENTS.md` / `CLAUDE.md` as a **compact routing map** pointing to domain-specific docs (`docs/`). The agent only reads the exact document it needs for the current task.
+
+```text
+Your Project
+├── AGENTS.md / CLAUDE.md       <-- Small entrypoint & routing table (always loaded)
+└── docs/
+    ├── architecture.md         <-- Loaded on-demand when changing system design
+    ├── api-contracts.md        <-- Loaded on-demand when touching endpoints
+    └── testing-standards.md    <-- Loaded on-demand when writing tests
+```
+
+---
 
 ## Install
 
-On macOS, Linux or Windows, with Node.js installed:
+Requires **Node.js** (for the `skills` CLI) and **Python 3** (for the bundled local inventory/link-checking helpers).
 
-```sh
+```bash
 npx skills add x0c/agent-doc-skills -g
 ```
 
-The installer offers `doc-init`, `doc-compact` and `doc-update` for compatible Agent Skills hosts. Python 3 is required for the bundled helpers. Start a new conversation after installation.
+Start a new agent conversation after installation so your host picks up `doc-init`, `doc-update`, and `doc-compact`.
 
-## First use
+> **Tip:** Managing skills across multiple coding agents? Use **[agentsync](https://github.com/x0c/agentsync)** to sync `~/.config/agentsync/skills/` across Claude Code, Cursor, Codex, and 15+ other tools automatically.
+
+---
+
+## Quick Start & Workflows
+
+You invoke these skills in plain language inside your coding agent session:
+
+| Skill | When to use it | Example prompt to type in your agent |
+| :--- | :--- | :--- |
+| **`doc-init`** | **Day 1 / New repo:** Bootstrap navigable project docs from existing code, READMEs, and configs, or upgrade the global documentation contract. | `Use doc-init to establish documentation for this project from its existing authorities.` |
+| **`doc-update`** | **Daily dev:** After finishing a feature or bugfix, persist reusable findings and architectural decisions into the right owning doc. | `Use doc-update to record this task's reusable findings in their owning documents.` |
+| **`doc-compact`** | **Cleanup / Audit:** Compress bloated docs without losing hard rules, numbers, or exceptions, and repair broken Markdown links. | `Use doc-compact to audit and compress this project's documentation.` |
+
+### Read-Only Audit Mode
+
+Want to see what `doc-compact` finds before it touches any file? Ask for a read-only audit:
 
 ```text
-Use doc-init to establish documentation for this project from its existing authorities.
+Use doc-compact to audit this project's documentation without changing files.
 ```
 
-For an existing project, choose the skill matching the work:
+---
 
-| Skill | Purpose |
-|---|---|
-| [doc-init](doc-init/SKILL.md) | Install or upgrade the global documentation contract, establish missing project documentation, or refresh affected coverage. |
-| [doc-compact](doc-compact/SKILL.md) | Audit or compress the authorized documentation scope, preserve adopted requirements and repair navigation. |
-| [doc-update](doc-update/SKILL.md) | Persist reusable findings and product decisions, correct stale documentation, and check session omissions. |
+## How It Works & Safety Guarantees
 
-For a read-only review, say `Use doc-compact to audit this project's documentation without changing files.` For routine maintenance, say `Use doc-update to record this task's reusable findings in their owning documents.`
+Unlike generic "summarize this repo" prompts, `agent-doc-skills` pairs structured agent procedures with deterministic Python helper scripts:
 
-## Operating boundaries
+- **Evidence-based, no hallucinated specs:** Bundled helpers scan your repo inventory, Git history, code signals, and Markdown links first. If evidence is missing, the skill reports the gap instead of inventing documentation.
+- **Lossless compression (`doc-compact`):** Preserves exact scopes, exceptions, numeric thresholds, evidence, and machine-parsed markers while stripping fluff.
+- **Safe global preset injection:** `doc-init` discovers real global instruction files and preserves your existing custom instructions and neighboring managed blocks.
+- **No unauthorized background subagents:** Skills execute directly in your main session by default and respect your host's permission and model policies.
 
-Record adopted durable decisions before implementing them. Use accurate content summaries so an ordinary task can discover its relevant standards before a design decision. Preserve scope, exceptions, evidence, numbers and machine-parsed markers during compression.
+---
 
-The current documentation preset is v21. Its injector discovers real global instruction files and preserves neighboring user and managed content. It does not inject the global preset into product instruction files. Root `AGENTS.md` edits use the separate `agents-md-edit` skill; report a missing capability instead of bypassing it.
+## 🧩 Related Tools in the AI Coding Suite
 
-Execute directly by default. External workers require explicit authorization and follow the current environment's model policy; these skills do not authorize native subagents. Read-only audits do not install presets or repair files. Bounded maintenance does not imply a full repository census. Permission, language, Git/release, memory, platform and model policies remain with the user and environment.
+If you run multiple AI coding agents daily, check out the rest of the local-first toolkit:
 
-Helpers gather inventory, code signals, history and optional database evidence; the agent still determines domain ownership and business meaning. Link and coverage reports establish only what was actually checked. Home-relative Markdown targets are resolved as complete paths; a successful report does not prove semantic preservation or future model adherence.
-
-## Maintenance
-
-The maintained source is `~/.config/agentsync/skills/`. This repository is published from that source. Keep reusable project knowledge in its owning documents and report missing evidence rather than inventing it.
+| Repository | Description |
+| :--- | :--- |
+| **[corral](https://github.com/corral-dev/corral)** | Run Claude Code, Codex, OpenCode, Cursor & Pi side-by-side in a terminal session manager, then continue from iPhone or Mac. |
+| **[subswap](https://github.com/x0c/subswap)** | Check remaining quota and switch Claude Code, Codex, Cursor, Kimi Code & OpenCode accounts without logging out. |
+| **[agentsync](https://github.com/x0c/agentsync)** | Sync `AGENTS.md`, `CLAUDE.md`, skills, and MCP configs across coding agents from one local source of truth. |
+| **[sesskit](https://github.com/x0c/sesskit)** | Parse and export local Claude Code, Codex CLI, and Cursor session transcript files from disk. |
 
 ## License
 
-[MIT](LICENSE).
+[MIT](LICENSE)
